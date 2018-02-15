@@ -1,5 +1,6 @@
 package com.example.zaheenkhan.kitchenassistant;
 
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -137,15 +138,40 @@ public class DashboardActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+
+            switch (position)
+            {
+                case 0:
+                    DashboardFragment tab1 = new DashboardFragment();
+                    return tab1;
+
+                case 1:
+                    InventoryFragment tab2 = new InventoryFragment();
+                    return tab2;
+
+                default:
+                    return null;
+            }
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 3;
+            return 2;
+        }
+
+        @Nullable
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position)
+            {
+                case 0:
+                    return "DASHBOARD";
+
+                case 1:
+                    return "INVENTORY";
+
+            }
+            return null;
         }
     }
 }

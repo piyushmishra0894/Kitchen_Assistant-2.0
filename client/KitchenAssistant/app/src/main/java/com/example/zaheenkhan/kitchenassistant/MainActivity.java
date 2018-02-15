@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.content.Intent;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -125,6 +126,17 @@ public class MainActivity extends AppCompatActivity
         });
 
         callbackManager = CallbackManager.Factory.create();
+
+        final Button db_button = findViewById(R.id.button2);
+        db_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i1 = new Intent(MainActivity.this,DashboardActivity.class);
+                startActivity(i1);
+            }
+        });
+
+
 //        final AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
 //        builder1.setMessage("Log-In Successful.");
 //        builder1.setCancelable(true);
@@ -173,6 +185,8 @@ public class MainActivity extends AppCompatActivity
                             public void onSuccess(MobileServiceUser user) {
 //                                alert11.show();
                                 logbox.setText("Login Success");
+                                Intent i1 = new Intent(MainActivity.this,DashboardActivity.class);
+                                startActivity(i1);
 
                             }
                         });
