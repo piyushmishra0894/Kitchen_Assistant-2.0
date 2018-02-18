@@ -1,6 +1,8 @@
 package com.example.zaheenkhan.kitchenassistant;
 
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
+import android.support.annotation.BinderThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,6 +15,15 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -31,6 +42,8 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_inventory,container,false);
         Button b = (Button) view.findViewById(R.id.b_addItem);
+        b.setOnClickListener(this);
+        b = (Button)view.findViewById(R.id.b_save);
         b.setOnClickListener(this);
         return view;
     }
@@ -72,12 +85,21 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
     public void save(){
         for(Row row: rows){
-            if(row.actv.getText().toString() != null && row.actv.getText().toString() != ""
+            if(row.actv.getText().toString().trim().length() != 0
                     &&
-                    row.et.getText().toString() != null && row.et.getText().toString() != ""){
+                    row.et.getText().toString().trim().length() != 0){
                 items.add(new Item(row.actv.getText().toString(), Double.parseDouble(row.et.getText().toString())));
             }
         }
+        Gson gson = new GsonBuilder().create();
+        JsonArray itemsList = gson.toJsonTree(items).getAsJsonArray();
+        RequestParams params = new RequestParams();
+        params.add("id", "1");
+        params.add("inventory", itemsList.toString());
+        HttpUtils.post("saveInventory", params, new JsonHttpResponseHandler(){
+            public void onSuccess(int statusCode, PreferenceActivity.Header[] headers, byte[] response) {
+                Toast.makeText(getActivity(), "Successfully saved", Toast.LENGTH_LONG);            }
+        });
 
     }
 
