@@ -1,6 +1,6 @@
 {
   "development": {
-    "username": "kitchenTeam",
+    "username": "kitchenteam",
     "password": "kitchenpassword",
     "database": "ebdb",
     "host":"aabuis97aodyql.ctztml3o8y0z.us-east-2.rds.amazonaws.com",
@@ -14,7 +14,7 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "kitchenTeam",
+    "username": "kitchenteam",
     "password": "kitchenpassword",
     "database": "ebdb",
     "host":"aabuis97aodyql.ctztml3o8y0z.us-east-2.rds.amazonaws.com",
