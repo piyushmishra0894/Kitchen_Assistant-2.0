@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -25,8 +26,12 @@ import com.loopj.android.http.RequestParams;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Map;
+
+import cz.msebera.android.httpclient.Header;
 
 /**
  * Created by zaheenkhan on 2/13/18.
@@ -49,9 +54,33 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
     }
 
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        for(int i=1;i<=3;i++){
-            addRow(getView());
-        }
+        HttpUtils.get("userinventory", null, new JsonHttpResponseHandler(){
+            public void onSuccess(int statusCode, Header[] headers, JSONObject jsonObject) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    InventoryModel response = mapper.readValue(jsonObject.toString(), InventoryModel.class);
+                    int index = 0;
+                    for(Item item: response.inventory){
+                        addRow(getView());
+                        rows.get(index).actv.setText(item.name);
+                        rows.get(index).et.setText(item.qty+"");
+                        index++;
+                    }
+                    if(index < 3){
+                        addRow(getView());
+                        index++;
+                    }
+                    Toast.makeText(getActivity(), "Check the inventory tab for your saved grocery!", Toast.LENGTH_LONG).show();
+                } catch (IOException e) {
+                    Toast.makeText(getActivity(), "Could not read your saved grocery", Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                Toast.makeText(getActivity(), "Could not read your data", Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     public void addRow(View v){
@@ -96,9 +125,9 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         RequestParams params = new RequestParams();
         params.add("id", "1");
         params.add("inventory", itemsList.toString());
-        HttpUtils.post("saveInventory", params, new JsonHttpResponseHandler(){
+        HttpUtils.post("userinventory", params, new JsonHttpResponseHandler(){
             public void onSuccess(int statusCode, PreferenceActivity.Header[] headers, byte[] response) {
-                Toast.makeText(getActivity(), "Successfully saved", Toast.LENGTH_LONG);            }
+                Toast.makeText(getActivity(), "Successfully saved", Toast.LENGTH_LONG).show();            }
         });
 
     }
@@ -136,4 +165,12 @@ class Item{
         name = p_name;
         qty = p_qty;
     }
+    Item(){
+
+    }
+}
+class InventoryModel
+{
+    protected Item[] inventory;
+    protected int userId;
 }

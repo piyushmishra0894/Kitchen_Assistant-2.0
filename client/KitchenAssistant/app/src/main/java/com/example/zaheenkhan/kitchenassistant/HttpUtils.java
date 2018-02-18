@@ -6,12 +6,12 @@ import com.loopj.android.http.*;
  */
 
 public class HttpUtils {
-    private static final String BASE_URL = "https://BaseURL/";
+    private static final String BASE_URL = "https://1bf05016-3e44-4c89-90a3-14ea6e0b10a1.mock.pstmn.io";
 
     private static AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
 
     public static void get(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-        client.get(getAbsoluteUrl(url), params, responseHandler);
+        client.get(BASE_URL, params, responseHandler);
     }
 
     public static void post(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
