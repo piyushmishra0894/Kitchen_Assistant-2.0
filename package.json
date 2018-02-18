@@ -1,11 +1,12 @@
 {
-  "name": "Kitchen_Assistant",
+  "name": "kitchen_assistant",
   "version": "1.0.0",
   "description": "project",
   "main": "index.js",
   "scripts": {
     "start:dev": "nodemon ./www",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "sequelize db:migrate"
   },
   "author": "",
   "license": "ISC",

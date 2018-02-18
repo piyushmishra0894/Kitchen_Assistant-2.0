@@ -2,8 +2,8 @@
   "development": {
     "username": "kitchenTeam",
     "password": "kitchenpassword",
-    "database": "kitchenDB",
-    "host": "kitchendb.ctztml3o8y0z.us-east-2.rds.amazonaws.com",
+    "database": "ebdb",
+    "host":"aabuis97aodyql.ctztml3o8y0z.us-east-2.rds.amazonaws.com",
     "dialect": "mysql"
   },
   "test": {
@@ -14,10 +14,10 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "username": "kitchenTeam",
+    "password": "kitchenpassword",
+    "database": "ebdb",
+    "host":"aabuis97aodyql.ctztml3o8y0z.us-east-2.rds.amazonaws.com",
     "dialect": "mysql"
   }
 }
