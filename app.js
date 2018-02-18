@@ -1,35 +1,26 @@
+const express = require('express');
+const logger = require('morgan');
+const bodyParser = require('body-parser');
 
-/**
- * Module dependencies.
- */
+// Set up the express app
+const app = express();
 
-var express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
-  , http = require('http')
-  , path = require('path');
+// Log requests to the console.
+app.use(logger('dev'));
 
-var app = express();
+// Parse incoming requests data (https://github.com/expressjs/body-parser)
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
-// all environments
-app.set('port', process.env.PORT || 3000);
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
-app.use(express.favicon());
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
+require('./server/routes')(app);
+// Setup a default catch-all route that sends back a welcome message in JSON format.
+app.get('*', (req, res) => res.status(200).send({
+  message: 'Welcome to the beginning of nothingness.',
+}));
 
-// development only
+//development only
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+ // app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
-app.get('/users', user.list);
-
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});
+module.exports = app;
