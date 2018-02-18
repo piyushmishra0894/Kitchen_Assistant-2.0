@@ -1,13 +1,24 @@
 {
   "name": "Kitchen_Assistant",
-  "version": "0.0.1",
-  "private": true,
+  "version": "1.0.0",
+  "description": "project",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js"
+    "start:dev": "nodemon ./www",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "express": "^3.2.6",
-    "jade": "^1.11.0",
-    "mysql": "^2.15.0"
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "morgan": "^1.9.0",
+    "mysql2": "^1.5.2",
+    "sequelize": "^4.33.4",
+    "sequelize-cli": "^4.0.0",
+    "jade": "^1.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.15.0"
   }
 }
