@@ -1,11 +1,12 @@
 {
-  "name": "Kitchen_Assistant",
+  "name": "kitchen_assistant",
   "version": "1.0.0",
   "description": "project",
   "main": "index.js",
   "scripts": {
     "start:dev": "nodemon ./www",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "sequelize db:migrate"
   },
   "author": "",
   "license": "ISC",
@@ -16,7 +17,8 @@
     "mysql2": "^1.5.2",
     "sequelize": "^4.33.4",
     "sequelize-cli": "^4.0.0",
-    "jade": "^1.11.0"
+    "jade": "^1.11.0",
+    "nodemon": "^1.15.0"
   },
   "devDependencies": {
     "nodemon": "^1.15.0"
