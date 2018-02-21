@@ -15,5 +15,6 @@
     <string name="dashboard_text_2">We have some great things in store for you.</string>
     <string name="inventory_text_1">This is your Inventory!</string>
     <string name="inventory_text_2">This is the list of what you have in store</string>
+    <string name="title_activity_google_vision_api">GoogleVisionAPI</string>
 
 </resources>
