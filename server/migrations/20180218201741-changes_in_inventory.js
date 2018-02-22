@@ -31,7 +31,7 @@ module.exports = {
           },
           allowNull: false
       },
-      ingredientId: {
+      ItemId: {
         type: Sequelize.INTEGER,
           references: {
             model: 'ingredients',

@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     });*/
     Inventory.belongsTo(models.Ingredient)
     /*, {
-    	foreignKey: 'ingredientId',
+    	foreignKey: 'itemId',
      	onDelete: 'CASCADE',
     });*/
   };
