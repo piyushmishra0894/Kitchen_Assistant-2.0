@@ -3,3 +3,49 @@
 ################################################################################
 
 *.suo
+# OS X
+.DS_Store*
+Icon?
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+*~
+
+
+# npm
+node_modules
+package-lock.json
+*.log
+*.gz
+
+
+# Coveralls
+coverage
+
+# Benchmarking
+benchmarks/graphs
+
+#For the client project
+client/KitchenAssistant/*.iml
+client/KitchenAssistant/.gradle
+client/KitchenAssistant/local.properties
+client/KitchenAssistant/.idea
+client/KitchenAssistant/.DS_Store
+client/KitchenAssistant/build
+client/KitchenAssistant/captures
+client/KitchenAssistant/.externalNativeBuild
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+.vscode
+.project
+.metadata
