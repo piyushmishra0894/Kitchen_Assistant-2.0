@@ -1,6 +1,7 @@
 const Inventory = require('../models').Inventory
 const Ingredient = require('../models').Ingredient
 const Sequelize = require('sequelize')
+const Promise = require('bluebird')
 const op = Sequelize.Op
 
 module.exports = {
@@ -24,54 +25,76 @@ module.exports = {
     .catch(error => res.status(400).send(error))
     */
 
-    var inventory = Inventory.findAll({
+    return Inventory.findAll({
       where: {
         UserId: req.params.id
       }
     // include: [Ingredient]
     })
       .then(inventory => {
-        var arry = [];
-        inventory.forEach(function (value, index) {
+        promises = [];
+          promises.push(new Promise(function(resolve,reject){
+            let resObj = inventory.map(value => {
+                var temp = [];
+                  return Ingredient.findOne({
+                    where: {id: value.Itemid
+                  }})
+                  .then(item => {
+                    const tobj = Object.assign(
+                      {},
+                      {
+                        id: item.id,
+                        item: value,
+                        name: item.name
+                      }
+                    );
+                    return tobj;
+                  }).then(tempObj => {return tempObj});
+            });
+            Promise.all(resObj).then(results => {
+              console.log("resObj" + results);
+              resolve(results);
+            })
+          }))  
+        
+           /*
+          arry = [];
+          promises = [];
+          inventory.forEach(function (value, index) {
+          promises.push(new Promise(function(resolve,reject){
            Ingredient.findOne({
               where: {id: value.Itemid
             }})
-              .then(ingredients => {
+              .then(item => {
                 const resObj = inventory.map(value => {
                   return Object.assign(
                     {},
                     {
-                      id: ingredients.id,
-                      UserId: inventory.UserId,
-                      name: ingredients.name
+                      id: item.id,
+                      UserId: inventory[0].UserId,
+                      name: item.name
                     }
                   )
                 });
-              
-                res.json(resObj);
+                arry.push(resObj);
+                console.log(resObj);
+                resolve(arry);
               })
               .catch(error => {
                 console.log(error);
                 res.status(401).send(error);})
-        });
-        //res.status(202).write(value);
-        //res.status(202).write(inventory);
-        return inventory;
+          }))
+        });*/
+
+        Promise.all(promises).then(function(data) {
+          //console.log("result:" + data);
+          res.status(201).send(data)})
+        .catch(error => res.status(401).send(error));
       })
       .catch(error => {
         console.log(error);
         res.status(400).send(error);
       });
-      //res.end();
-      //res.status(202).send(inventory);
-  /*
-      return Ingredient.findAll({
-        where: {id: {
-            [op.in]: [1,2,3]
-          } 
-        }})
-        .then(ingredientList => res.status(202).send(inventory))
-        .catch(error => res.status(400).send(error));*/
   }
 
 }
