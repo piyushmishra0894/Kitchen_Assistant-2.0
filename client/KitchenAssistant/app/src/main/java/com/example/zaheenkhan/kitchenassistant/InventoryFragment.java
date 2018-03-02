@@ -2,7 +2,6 @@ package com.example.zaheenkhan.kitchenassistant;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-import android.support.annotation.BinderThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,8 +14,12 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,10 +27,13 @@ import com.google.gson.JsonArray;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
+import junit.runner.Version;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -40,7 +46,7 @@ import cz.msebera.android.httpclient.Header;
 public class InventoryFragment extends Fragment implements View.OnClickListener{
 
     ArrayList<Row> rows = new ArrayList<Row>();
-    ArrayList<Item> items = new ArrayList<Item>();
+    ArrayList<Inventory> items = new ArrayList<Inventory>();
 
     @Nullable
     @Override
@@ -54,30 +60,58 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
     }
 
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        HttpUtils.get("userinventory", null, new JsonHttpResponseHandler(){
-            public void onSuccess(int statusCode, Header[] headers, JSONObject jsonObject) {
+        RequestParams params = new RequestParams();
+        params.add("id", "1");
+        final TextView tt = view.findViewById(R.id.tt1);
+        //tt.setText("before");
+        HttpUtils.get("/api/inventory/1", params, new JsonHttpResponseHandler(){
+            public void onSuccess(int statusCode, Header[] headers, JSONArray jsonObject) {
                 ObjectMapper mapper = new ObjectMapper();
+
+                mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+
                 try {
-                    InventoryModel response = mapper.readValue(jsonObject.toString(), InventoryModel.class);
+
+
+                    Inventory[] response = mapper.readValue(jsonObject.toString(), Inventory[].class);
+                    //tt.setText(response.getIngredient().toString());
+
+
+
+
                     int index = 0;
-                    for(Item item: response.inventory){
+//                    tt.setText(response.getIngredient().getName());
+//                    addRow(getView());
+//                        rows.get(index).actv.setText(response.getIngredient().getName());
+//                        rows.get(index).et.setText(response.getQuantity()+"");
+                    for(Inventory item: response){
                         addRow(getView());
-                        rows.get(index).actv.setText(item.name);
-                        rows.get(index).et.setText(item.qty+"");
+                        rows.get(index).actv.setText(item.getIngredient().getName());
+                        rows.get(index).et.setText(item.getQuantity()+"");
                         index++;
                     }
                     if(index < 3){
                         addRow(getView());
                         index++;
                     }
+
+
+//                    addRow(getView());
+//                        rows.get(0).actv.setText(jsonObject.getJSONObject(0).getString("id"));
+//                        rows.get(0).et.setText(jsonObject.getJSONObject(0).getString("Quantity")+"");
+
                     Toast.makeText(getActivity(), "Check the inventory tab for your saved grocery!", Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    Toast.makeText(getActivity(), "Could not read your saved grocery", Toast.LENGTH_LONG).show();
+                } catch (Exception e)
+                {
+                    Toast.makeText(getActivity(), "Could not read your saved grocery"+e.toString(), Toast.LENGTH_LONG).show();
+                    tt.setText(e.toString());
+                    e.printStackTrace();
                 }
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                 Toast.makeText(getActivity(), "Could not read your data", Toast.LENGTH_LONG).show();
+                tt.setText("failure");
             }
         });
 
@@ -117,7 +151,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
             if(row.actv.getText().toString().trim().length() != 0
                     &&
                     row.et.getText().toString().trim().length() != 0){
-                items.add(new Item(row.actv.getText().toString(), Double.parseDouble(row.et.getText().toString())));
+                //items.add(new Inventory(row.actv.getText().toString(), row.et.getText().toString()));
             }
         }
         Gson gson = new GsonBuilder().create();
@@ -158,19 +192,191 @@ class Row{
         et = p_et;
     }
 }
-class Item{
-    String name;
-    double qty;
-    Item(String p_name, double p_qty){
-        name = p_name;
-        qty = p_qty;
-    }
-    Item(){
 
+class Ingredient
+{
+    private String updatedAt;
+
+    private String id;
+
+    private String createdAt;
+
+    private String measurementType;
+
+    private String name;
+
+    public String getUpdatedAt ()
+    {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt (String updatedAt)
+    {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getId ()
+    {
+        return id;
+    }
+
+    public void setId (String id)
+    {
+        this.id = id;
+    }
+
+    public String getCreatedAt ()
+    {
+        return createdAt;
+    }
+
+    public void setCreatedAt (String createdAt)
+    {
+        this.createdAt = createdAt;
+    }
+
+    public String getMeasurementType ()
+    {
+        return measurementType;
+    }
+
+    public void setMeasurementType (String measurementType)
+    {
+        this.measurementType = measurementType;
+    }
+
+    public String getName ()
+    {
+        return name;
+    }
+
+    public void setName (String name)
+    {
+        this.name = name;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ClassPojo [updatedAt = "+updatedAt+", id = "+id+", createdAt = "+createdAt+", measurementType = "+measurementType+", name = "+name+"]";
     }
 }
+@JsonIgnoreProperties(value = { "IngredientObj" })
+class Inventory
+{
+    private String IngredientId;
+
+    private String updatedAt;
+
+    private String id;
+
+    private String Quantity;
+
+    private String createdAt;
+
+    private String Itemid;
+
+    public Ingredient getIngredient() {
+        return Ingredient;
+    }
+
+    public void setIngredient(Ingredient ingredient) {
+        Ingredient = ingredient;
+    }
+
+    private Ingredient Ingredient;
+
+    public Ingredient getIngredientObj() {
+        return IngredientObj;
+    }
+
+    public void setIngredientObj(Ingredient ingredientObj) {
+        IngredientObj = ingredientObj;
+    }
+
+    private Ingredient IngredientObj;
+
+    private String UserId;
+
+    public String getIngredientId ()
+    {
+        return IngredientId;
+    }
+
+    public void setIngredientId (String IngredientId)
+    {
+        this.IngredientId = IngredientId;
+    }
+
+    public String getUpdatedAt ()
+    {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt (String updatedAt)
+    {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getId ()
+    {
+        return id;
+    }
+
+    public void setId (String id)
+    {
+        this.id = id;
+    }
+
+    public String getQuantity ()
+    {
+        return Quantity;
+    }
+
+    public void setQuantity (String Quantity)
+    {
+        this.Quantity = Quantity;
+    }
+
+    public String getCreatedAt ()
+    {
+        return createdAt;
+    }
+
+    public void setCreatedAt (String createdAt)
+    {
+        this.createdAt = createdAt;
+    }
+
+    public String getItemid ()
+    {
+        return Itemid;
+    }
+
+    public void setItemid (String Itemid)
+    {
+        this.Itemid = Itemid;
+    }
+
+    public String getUserId ()
+    {
+        return UserId;
+    }
+
+    public void setUserId (String UserId)
+    {
+        this.UserId = UserId;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ClassPojo [IngredientId = "+IngredientId+", updatedAt = "+updatedAt+", id = "+id+", Quantity = "+Quantity+", createdAt = "+createdAt+", Itemid = "+Itemid+" , UserId = "+UserId+"]";
+    }
+}
+
 class InventoryModel
 {
-    protected Item[] inventory;
-    protected int userId;
+    protected Inventory[] inventory;
+    //protected int userId;
 }

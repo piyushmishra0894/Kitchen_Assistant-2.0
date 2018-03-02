@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.zaheenkhan.kitchenassistant"
         minSdkVersion 21
@@ -9,6 +9,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -25,9 +26,9 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support:support-v4:26.1.0'
-    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:appcompat-v7:27.0.2'
+    implementation 'com.android.support:support-v4:27.0.2'
+    implementation 'com.android.support:design:27.0.2'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 
     implementation 'com.facebook.android:facebook-login:[4,5)'
@@ -48,9 +49,9 @@ dependencies {
     compile 'com.google.android.gms:play-services-auth:11.8.0'
     compile 'com.loopj.android:android-async-http:1.4.9'
     compile (
-            [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.4.1'],
-            [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.4.1'],
-            [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.1']
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.0'],
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.0'],
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0']
     )
     compile 'com.microsoft.azure:azure-mobile-android:3.4.0'
 }

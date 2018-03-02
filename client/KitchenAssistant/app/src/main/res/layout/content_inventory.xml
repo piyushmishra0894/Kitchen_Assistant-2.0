@@ -21,14 +21,21 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="393dp">
+            android:layout_height="359dp">
 
             <LinearLayout
                 android:id="@+id/ll_itemsList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"></LinearLayout>
+
         </ScrollView>
+
+        <TextView
+            android:id="@+id/tt1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
 
         <Button
             android:id="@+id/b_addItem"
