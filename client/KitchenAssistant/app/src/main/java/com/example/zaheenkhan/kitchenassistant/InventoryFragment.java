@@ -1,5 +1,6 @@
 package com.example.zaheenkhan.kitchenassistant;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.support.annotation.NonNull;
@@ -32,6 +33,7 @@ import junit.runner.Version;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -88,6 +90,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                         addRow(getView());
                         rows.get(index).actv.setText(item.getIngredient().getName());
                         rows.get(index).et.setText(item.getQuantity()+"");
+                        rows.get(index).tv.setText(item.getIngredient().getMeasurementType());
                         index++;
                     }
                     if(index < 3){
@@ -122,16 +125,19 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         LinearLayout row = new LinearLayout(getActivity());
         row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         AutoCompleteTextView at = getAutoCompleteTextView();
-        at.setWidth(700);
+        TextView tv = new TextView(getActivity());
+        at.setWidth(550);
         at.setHint("Item");
         EditText et = new EditText(getActivity());
         et.setInputType(InputType.TYPE_CLASS_NUMBER);
         et.setWidth(300);
         et.setHint("Qty");
+        tv.setWidth(250);
         row.addView(at);
         row.addView(et);
+        row.addView(tv);
         ll.addView(row);
-        rows.add(new Row(at, et));
+        rows.add(new Row(at, et,tv));
     }
 
     @Override
@@ -187,9 +193,11 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 class Row{
     AutoCompleteTextView actv;
     EditText et;
-    Row(AutoCompleteTextView p_actv, EditText p_et){
+    TextView tv;
+    Row(AutoCompleteTextView p_actv, EditText p_et, TextView p_tv){
         actv = p_actv;
         et = p_et;
+        tv = p_tv;
     }
 }
 
