@@ -49,3 +49,4 @@ client/KitchenAssistant/.externalNativeBuild
 .vscode
 .project
 .metadata
+.classpath
