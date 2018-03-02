@@ -15,17 +15,28 @@ module.exports = {
       .then(inventory => res.status(201).send(inventory))
       .catch(error => res.status(400).send(error))
   },
-  retrieve(req, res) { /*
+  //Not tested -- need to recheck the validity os this code.
+  patch(req,res){
+    return Inventory
+    .update({
+      Quantity: req.params.Quantity,
+      where: {
+        UserId: req.params.id
+      }
+    })
+  },
+  //Tested with client integeration with display of Ingredient Quantity and Ingredient name.
+  retrieve(req, res) { 
     return Inventory.findAll({
       include: [Ingredient],
       where: {
        UserId: req.params.id
       }})
-    .then(inventory => res.status(202).send(inventory))
+    .then(inventory => res.status(200).send(inventory))
     .catch(error => res.status(400).send(error))
-    */
+    
 
-    return Inventory.findAll({
+    /*return Inventory.findAll({
       where: {
         UserId: req.params.id
       }
@@ -84,7 +95,7 @@ module.exports = {
                 console.log(error);
                 res.status(401).send(error);})
           }))
-        });*/
+        });
 
         Promise.all(promises).then(function(data) {
           //console.log("result:" + data);
@@ -94,7 +105,7 @@ module.exports = {
       .catch(error => {
         console.log(error);
         res.status(400).send(error);
-      });
+      });*/
   }
 
 }
