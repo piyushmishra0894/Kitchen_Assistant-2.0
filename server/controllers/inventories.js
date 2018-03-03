@@ -18,7 +18,7 @@ module.exports = {
   patch(req, res) {
     inList = []
     inList = req.body
-    //console.log(inList[0])
+    console.log(inList[0])
     promises = []
     inList.forEach(function (value, i) {
       promises.push(new Promise(function (resolve, reject) {
@@ -33,13 +33,18 @@ module.exports = {
                 .catch(error => res.status(401).send(error))
             }
             else{
-              console.log("creating object: "+i);
-              Inventory.create(inList(i))
-              .then(inventory => resolve(inventory))
+              console.log(inList[i].toString());
+              Inventory.create({
+                UserId: inList[i].UserId,
+                Itemid: inList[i].Itemid,
+                IngredientId: inList[i].IngredientId,
+                Quantity: inList[i].Quantity
+              })
+              .then(inventory => {return inventory})
               .catch(error => res.status(401).send(error))
             }
           })
-          .then(updated => resolve(updated))
+          .then(updated => {return updated})
           .catch(error => res.status(402).send(error))
       }))
     }); 
@@ -49,13 +54,43 @@ module.exports = {
     .catch(error => res.status(401).send(error))
 
   },
+  delete(req,res) {
+    inList = []
+    inList = req.body
+    console.log(inList[0])
+    promises = []
+    inList.forEach(function (value, i) {
+      promises.push(new Promise(function (resolve, reject) {
+        return Inventory
+          .findOne({ where: { id: inList[i].id,UserId: inList[i].UserId } })
+          .then(function (obj) {
+            console.log("found object: "+i);
+            if (obj) { // update
+              console.log("updating object: "+i);
+              obj.destroy()
+                .then(inventory => resolve(inventory))
+                .catch(error => res.status(401).send(error))
+            }
+          })
+          .then(updated => {return updated})
+          .catch(error => res.status(402).send(error))
+      }))
+    }); 
+    Promise.all(promises).then(function(data) {
+      //console.log("result:" + data)
+      res.status(200).send(data)})
+    .catch(error => res.status(401).send(error))
+  },
   retrieve(req, res) {
     return Inventory.findAll({
       include: [Ingredient],
       where: {
         UserId: req.params.id
     }})
-      .then(inventory => res.status(200).send(inventory))
+      .then(inventory => {
+        console.log(inventory);
+        res.status(201).send(inventory);
+      })
       .catch(error => res.status(400).send(error))
 
 
