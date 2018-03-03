@@ -1,4 +1,4 @@
-﻿################################################################################
+################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
@@ -49,4 +49,5 @@ client/KitchenAssistant/.externalNativeBuild
 .vscode
 .project
 .metadata
+
 .classpath
