@@ -157,6 +157,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 tv.setText(dropList.get(position).getMeasurementType());
+                items.get(items.size()-1).setIngredient(dropList.get(position));
 //                if (items.get(items.size()-1).getIngredient()!=null)
 //                {
 //                    Ingredient newOne = dropList.get(position);
