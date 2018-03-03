@@ -11,11 +11,13 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +42,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Map;
+import java.util.Objects;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
@@ -53,6 +57,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
     ArrayList<Row> rows = new ArrayList<Row>();
     ArrayList<Inventory> items = new ArrayList<Inventory>();
+    ArrayList<Ingredient> dropList = new ArrayList<Ingredient>();
 
     @Nullable
     @Override
@@ -130,7 +135,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         LinearLayout row = new LinearLayout(getActivity());
         row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         AutoCompleteTextView at = getAutoCompleteTextView();
-        TextView tv = new TextView(getActivity());
+        final TextView tv = new TextView(getActivity());
         at.setWidth(550);
         at.setHint("Item");
         EditText et = new EditText(getActivity());
@@ -142,6 +147,13 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         row.addView(et);
         row.addView(tv);
         ll.addView(row);
+        at.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                tv.setText(dropList.get(position).getMeasurementType());
+            }
+        });
         rows.add(new Row(at, et,tv));
     }
 
@@ -150,6 +162,8 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         switch (view.getId()){
             case R.id.b_addItem:
                 addRow(view);
+                Inventory newItem = new Inventory();
+                items.add(newItem);
                 break;
             case R.id.b_save:
                 save();
@@ -157,20 +171,55 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         }
     }
 
-    @SuppressLint("ResourceType")
+    @SuppressLint({"ResourceType", "DefaultLocale"})
     public void save(){
         final TextView tt = getView().findViewById(R.id.tt1);
         int index =0;
-        for(Row row: rows){
-            if(row.actv.getText().toString().trim().length() != 0
-                    &&
-                    row.et.getText().toString().trim().length() != 0){
-                //items.add(new Inventory(row.actv.getText().toString(), row.et.getText().toString()));
-                items.get(index++).setQuantity(row.et.getText().toString().trim());
+        int exc = 0;
+        ArrayList<Inventory> saveItems = new ArrayList<>(items);
+        try {
+            for(Row row: rows){
+                if(row.actv.getText().toString().trim().length() != 0
+                        &&
+                        row.et.getText().toString().trim().length() != 0){
+                    //items.add(new Inventory(row.actv.getText().toString(), row.et.getText().toString()));
+                    if (!Objects.equals(items.get(index++).getQuantity(), row.et.getText().toString().trim()) &&
+                            !Objects.equals(row.et.getText().toString().trim(), "0")) {
+                        saveItems.get(index-1-exc).setQuantity(row.et.getText().toString().trim());
+                        saveItems.get(index-1-exc).setUpdatedAt(Calendar.getInstance().getTime().toString());
+                        items.get(index-1).setQuantity(row.et.getText().toString().trim());
+                        items.get(index-1).setUpdatedAt(Calendar.getInstance().getTime().toString());
+
+                        if (row.actv.getListSelection()!= ListView.INVALID_POSITION && saveItems.get(index-1-exc).getIngredient()==null)
+                        {
+                            Ingredient selected = dropList.get(row.actv.getListSelection());
+                            saveItems.get(index-1-exc).setIngredient(selected);
+                            saveItems.get(index-1-exc).setIngredientId(selected.getId());
+                            saveItems.get(index-1-exc).setItemid(selected.getId());
+                            saveItems.get(index-1-exc).setUserId("1");
+                            saveItems.get(index-1-exc).setCreatedAt(Calendar.getInstance().getTime().toString());
+                        }
+                    }
+                    else
+                    {
+                        saveItems.remove(index-1-exc);
+                        exc++;
+                    }
+                }
             }
+            //tt.setText(String.format("index: %d exc: %d", index, exc));
+            if (exc==index)
+            {
+                Toast.makeText(getActivity(), "Inventory already upto date. Nothing to save", Toast.LENGTH_LONG).show();
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getActivity(), "Could not save changes to Inventory", Toast.LENGTH_LONG).show();
+            //tt.setText(String.format("index: %d exc: %d  %s", index, exc, e.getStackTrace()[2].toString()));
         }
         Gson gson = new GsonBuilder().create();
-        JsonArray itemsList = gson.toJsonTree(items).getAsJsonArray();
+        JsonArray itemsList = gson.toJsonTree(saveItems).getAsJsonArray();
         /*RequestParams params = new RequestParams();
         params.add("id", "1");
         params.add("inventory", itemsList.toString());*/
@@ -180,21 +229,54 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        //tt.setText(params.toString());
         HttpUtils.put(getContext(),"/api/inventory/1", params, new JsonHttpResponseHandler(){
-            public void onSuccess(int statusCode, PreferenceActivity.Header[] headers, byte[] response) {
-                Toast.makeText(getActivity(), "Successfully saved", Toast.LENGTH_LONG).show();            }
+            public void onSuccess(int statusCode, PreferenceActivity.Header[] headers, Objects response) {
+                Toast.makeText(getActivity(), "Successfully saved", Toast.LENGTH_LONG).show();
+            }
+            public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                Toast.makeText(getActivity(), "Could not read your data", Toast.LENGTH_LONG).show();
+                tt.setText("failure");
+            }
+
         });
 
     }
 
     public AutoCompleteTextView getAutoCompleteTextView(){
-        final String[] ITEMS = new String[] {
-                "Milk", "Eggs", "Bread", "Banana", "Oil"
-        };
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_dropdown_item_1line, ITEMS);
+
+        final TextView tt = getView().findViewById(R.id.tt1);
         final AutoCompleteTextView textView = new AutoCompleteTextView(getActivity());
+        RequestParams params = new RequestParams();
+        HttpUtils.get("/api/ingredients", params, new JsonHttpResponseHandler() {
+                    public void onSuccess(int statusCode, Header[] headers, JSONArray jsonObject) {
+                        ObjectMapper mapper = new ObjectMapper();
+
+                        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+                        try {
+                            Ingredient[] response = mapper.readValue(jsonObject.toString(), Ingredient[].class);
+                            dropList.addAll(Arrays.asList(response));
+                            ArrayList<String> arry = new ArrayList<>();
+                            int index=0;
+                            for (Ingredient item: response
+                                 ) {
+                                arry.add(item.getName());
+                            }
+                            final String[] ITEMS = arry.toArray(new String[arry.size()]);
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                                    android.R.layout.simple_dropdown_item_1line, ITEMS);
+
+
+                            textView.setAdapter(adapter);
+
+                        }
+                        catch (Exception e)
+                        {
+                            Toast.makeText(getActivity(), "Could not read your saved grocery"+e.toString(), Toast.LENGTH_LONG).show();
+                            tt.setText(e.toString());
+                            e.printStackTrace();
+                        }
+                    }
+                });
         textView.setThreshold(0);
         textView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -202,7 +284,6 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                 textView.showDropDown();
             }
         });
-        textView.setAdapter(adapter);
         return textView;
     }
 }
@@ -300,6 +381,21 @@ class Inventory
 
     private String Itemid;
 
+    private Ingredient Ingredient;
+
+    private String UserId;
+
+    Inventory()
+    {
+        setId("-1");
+        setCreatedAt(Calendar.getInstance().getTime().toString());
+        setQuantity("0");
+        setItemid("-1");
+        setIngredientId("-1");
+        setIngredient(null);
+        setUserId("-1");
+    }
+
     public Ingredient getIngredient() {
         return Ingredient;
     }
@@ -307,20 +403,6 @@ class Inventory
     public void setIngredient(Ingredient ingredient) {
         Ingredient = ingredient;
     }
-
-    private Ingredient Ingredient;
-
-    public Ingredient getIngredientObj() {
-        return IngredientObj;
-    }
-
-    public void setIngredientObj(Ingredient ingredientObj) {
-        IngredientObj = ingredientObj;
-    }
-
-    private Ingredient IngredientObj;
-
-    private String UserId;
 
     public String getIngredientId ()
     {

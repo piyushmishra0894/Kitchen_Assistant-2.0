@@ -1,5 +1,6 @@
 const usersController = require('../controllers').users;
 const inventoriesController = require('../controllers').inventories;
+const ingredientsController = require('../controllers').ingredients;
 
 module.exports = (app) => {
   app.get('/api', (req, res) => res.status(200).send({
@@ -9,6 +10,6 @@ module.exports = (app) => {
  app.post('/api/inventory/:id', inventoriesController.create);
  app.get('/api/inventory/:id', inventoriesController.retrieve);
  app.put('/api/inventory/:id', inventoriesController.patch);
-
+ app.get('/api/ingredients', ingredientsController.retrieve);
 
 };

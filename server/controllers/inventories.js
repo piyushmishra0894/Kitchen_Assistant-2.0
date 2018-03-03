@@ -32,9 +32,15 @@ module.exports = {
                 .then(inventory => resolve(inventory))
                 .catch(error => res.status(401).send(error))
             }
+            else{
+              console.log("creating object: "+i);
+              Inventory.create(inList(i))
+              .then(inventory => resolve(inventory))
+              .catch(error => res.status(401).send(error))
+            }
           })
           .then(updated => resolve(updated))
-          .catch(error => res.status(400).send(error))
+          .catch(error => res.status(402).send(error))
       }))
     }); 
     Promise.all(promises).then(function(data) {
