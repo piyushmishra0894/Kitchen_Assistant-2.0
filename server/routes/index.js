@@ -8,5 +8,7 @@ module.exports = (app) => {
  app.post('/api/users', usersController.create);
  app.post('/api/inventory/:id', inventoriesController.create);
  app.get('/api/inventory/:id', inventoriesController.retrieve);
+ app.put('/api/inventory/:id', inventoriesController.patch);
+
 
 };

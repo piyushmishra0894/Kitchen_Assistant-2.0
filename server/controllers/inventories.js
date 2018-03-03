@@ -14,64 +14,114 @@ module.exports = {
       .then(inventory => res.status(201).send(inventory))
       .catch(error => res.status(400).send(error))
   },
-  retrieve(req, res) { /*
+  // Not tested -- need to recheck the validity os this code.
+  patch(req, res) {
+    inList = []
+    inList = req.body
+    //console.log(inList[0])
+    promises = []
+    inList.forEach(function (value, i) {
+      promises.push(new Promise(function (resolve, reject) {
+        return Inventory
+          .findOne({ where: { id: inList[i].id,UserId: inList[i].UserId } })
+          .then(function (obj) {
+            console.log("found object: "+i);
+            if (obj) { // update
+              console.log("updating object: "+i);
+              obj.update(inList[i])
+                .then(inventory => resolve(inventory))
+                .catch(error => res.status(401).send(error))
+            }
+          })
+          .then(updated => resolve(updated))
+          .catch(error => res.status(400).send(error))
+      }))
+    }); 
+    Promise.all(promises).then(function(data) {
+      //console.log("result:" + data)
+      res.status(200).send(data)})
+    .catch(error => res.status(401).send(error))
+
+  },
+  retrieve(req, res) {
     return Inventory.findAll({
       include: [Ingredient],
       where: {
-       UserId: req.params.id
-      }})
-    .then(inventory => res.status(202).send(inventory))
-    .catch(error => res.status(400).send(error))
-    */
-
-    var inventory = Inventory.findAll({
-      where: {
         UserId: req.params.id
-      }
-    // include: [Ingredient]
-    })
-      .then(inventory => {
-        var arry = [];
-        inventory.forEach(function (value, index) {
-           Ingredient.findOne({
-              where: {id: value.Itemid
-            }})
-              .then(ingredients => {
-                const resObj = inventory.map(value => {
-                  return Object.assign(
+    }})
+      .then(inventory => res.status(200).send(inventory))
+      .catch(error => res.status(400).send(error))
+
+
+  /*return Inventory.findAll({
+    where: {
+      UserId: req.params.id
+    }
+  // include: [Ingredient]
+  })
+    .then(inventory => {
+      promises = []
+        promises.push(new Promise(function(resolve,reject){
+          let resObj = inventory.map(value => {
+              var temp = []
+                return Ingredient.findOne({
+                  where: {id: value.Itemid
+                }})
+                .then(item => {
+                  const tobj = Object.assign(
                     {},
                     {
-                      id: ingredients.id,
-                      UserId: inventory.UserId,
-                      name: ingredients.name
+                      id: item.id,
+                      item: value,
+                      name: item.name
                     }
                   )
-                });
-              
-                res.json(resObj);
+                  return tobj
+                }).then(tempObj => {return tempObj})
+          })
+          Promise.all(resObj).then(results => {
+            console.log("resObj" + results)
+            resolve(results)
+          })
+        }))  */
+      
+         /*
+        arry = []
+        promises = []
+        inventory.forEach(function (value, index) {
+        promises.push(new Promise(function(resolve,reject){
+         Ingredient.findOne({
+            where: {id: value.Itemid
+          }})
+            .then(item => {
+              const resObj = inventory.map(value => {
+                return Object.assign(
+                  {},
+                  {
+                    id: item.id,
+                    UserId: inventory[0].UserId,
+                    name: item.name
+                  }
+                )
               })
-              .catch(error => {
-                console.log(error);
-                res.status(401).send(error);})
-        });
-        //res.status(202).write(value);
-        //res.status(202).write(inventory);
-        return inventory;
+              arry.push(resObj)
+              console.log(resObj)
+              resolve(arry)
+            })
+            .catch(error => {
+              console.log(error)
+              res.status(401).send(error);})
+        }))
       })
-      .catch(error => {
-        console.log(error);
-        res.status(400).send(error);
-      });
-      //res.end();
-      //res.status(202).send(inventory);
-  /*
-      return Ingredient.findAll({
-        where: {id: {
-            [op.in]: [1,2,3]
-          } 
-        }})
-        .then(ingredientList => res.status(202).send(inventory))
-        .catch(error => res.status(400).send(error));*/
+      Promise.all(promises).then(function(data) {
+        //console.log("result:" + data)
+        res.status(201).send(data)})
+      .catch(error => res.status(401).send(error))
+    })
+    .catch(error => {
+      console.log(error)
+      res.status(400).send(error)
+    });*/
   }
 
 }
