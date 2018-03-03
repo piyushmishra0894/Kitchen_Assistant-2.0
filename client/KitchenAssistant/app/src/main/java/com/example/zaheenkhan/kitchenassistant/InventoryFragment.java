@@ -1,5 +1,6 @@
 package com.example.zaheenkhan.kitchenassistant;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
@@ -36,10 +37,13 @@ import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.entity.StringEntity;
 
 /**
  * Created by zaheenkhan on 2/13/18.
@@ -76,6 +80,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
 
                     Inventory[] response = mapper.readValue(jsonObject.toString(), Inventory[].class);
+                    items.addAll(Arrays.asList(response));
                     //tt.setText(response.getIngredient().toString());
 
 
@@ -152,20 +157,31 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         }
     }
 
+    @SuppressLint("ResourceType")
     public void save(){
+        final TextView tt = getView().findViewById(R.id.tt1);
+        int index =0;
         for(Row row: rows){
             if(row.actv.getText().toString().trim().length() != 0
                     &&
                     row.et.getText().toString().trim().length() != 0){
                 //items.add(new Inventory(row.actv.getText().toString(), row.et.getText().toString()));
+                items.get(index++).setQuantity(row.et.getText().toString().trim());
             }
         }
         Gson gson = new GsonBuilder().create();
         JsonArray itemsList = gson.toJsonTree(items).getAsJsonArray();
-        RequestParams params = new RequestParams();
+        /*RequestParams params = new RequestParams();
         params.add("id", "1");
-        params.add("inventory", itemsList.toString());
-        HttpUtils.post("userinventory", params, new JsonHttpResponseHandler(){
+        params.add("inventory", itemsList.toString());*/
+        StringEntity params = null;
+        try {
+            params = new StringEntity(itemsList.toString());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        //tt.setText(params.toString());
+        HttpUtils.put(getContext(),"/api/inventory/1", params, new JsonHttpResponseHandler(){
             public void onSuccess(int statusCode, PreferenceActivity.Header[] headers, byte[] response) {
                 Toast.makeText(getActivity(), "Successfully saved", Toast.LENGTH_LONG).show();            }
         });
