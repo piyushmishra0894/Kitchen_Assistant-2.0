@@ -1,6 +1,9 @@
 const Inventory = require('../models').Inventory
 const Ingredient = require('../models').Ingredient
 const Sequelize = require('sequelize')
+
+const Promise = require('bluebird')
+
 const op = Sequelize.Op
 
 module.exports = {
@@ -47,9 +50,19 @@ module.exports = {
       //console.log("result:" + data)
       res.status(200).send(data)})
     .catch(error => res.status(401).send(error))
-
   },
-  retrieve(req, res) {
+  //Not tested -- need to recheck the validity os this code.
+  patch(req,res){
+    return Inventory
+    .update({
+      Quantity: req.params.Quantity,
+      where: {
+        UserId: req.params.id
+      }
+    })
+  },
+  //Tested with client integeration with display of Ingredient Quantity and Ingredient name.
+  retrieve(req, res) { 
     return Inventory.findAll({
       include: [Ingredient],
       where: {
