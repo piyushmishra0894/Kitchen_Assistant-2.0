@@ -214,6 +214,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                         }
                         ll.removeViewAt(i);
                         rows.remove(i);
+                        i--;
                         //items.remove(i);
                     }
                 }
@@ -351,7 +352,6 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                                 dropList.clear();
                                 dropList.addAll(Arrays.asList(response));
                                 ArrayList<String> arry = new ArrayList<>();
-                                int index=0;
                                 for (Ingredient item: response
                                      ) {
                                     arry.add(item.getName());
@@ -374,6 +374,10 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                         }
                     });
         } else {
+            for (int i=0;i<rows.size();i++){
+                    dropAdapter.remove(rows.get(i).it.getIngredient().getName());
+                    dropAdapter.notifyDataSetChanged();
+                }
             textView.setAdapter(dropAdapter);
             dropAdapter.notifyDataSetChanged();
         }
