@@ -17,11 +17,11 @@ module.exports = {
       .then(inventory => res.status(201).send(inventory))
       .catch(error => res.status(400).send(error))
   },
-  // Not tested -- need to recheck the validity os this code.
+  // Code Tested with client integeration.
   patch(req, res) {
     inList = []
     inList = req.body
-    console.log(inList[0])
+    //console.log(inList[0])
     promises = []
     inList.forEach(function (value, i) {
       promises.push(new Promise(function (resolve, reject) {
@@ -36,14 +36,14 @@ module.exports = {
                 .catch(error => res.status(401).send(error))
             }
             else{
-              console.log(inList[i].toString());
+              console.log("Inventory:Patch creating new object");
               Inventory.create({
                 UserId: inList[i].UserId,
                 Itemid: inList[i].Itemid,
                 IngredientId: inList[i].IngredientId,
                 Quantity: inList[i].Quantity
               })
-              .then(inventory => {return inventory})
+              .then(inventory => resolve(inventory))
               .catch(error => res.status(401).send(error))
             }
           })
@@ -52,8 +52,8 @@ module.exports = {
       }))
     }); 
     Promise.all(promises).then(function(data) {
-      //console.log("result:" + data)
-      res.status(200).send(data)})
+      console.log(data)
+      res.status(202).send(data)})
     .catch(error => res.status(401).send(error))
   },
   delete(req,res) {
@@ -68,7 +68,7 @@ module.exports = {
           .then(function (obj) {
             console.log("found object: "+i);
             if (obj) { // update
-              console.log("updating object: "+i);
+              console.log("deleting object: "+i);
               obj.destroy()
                 .then(inventory => resolve(inventory))
                 .catch(error => res.status(401).send(error))
@@ -90,7 +90,7 @@ module.exports = {
         UserId: req.params.id
     }})
       .then(inventory => {
-        console.log(inventory);
+        //console.log(inventory);
         res.status(201).send(inventory);
       })
       .catch(error => res.status(400).send(error))

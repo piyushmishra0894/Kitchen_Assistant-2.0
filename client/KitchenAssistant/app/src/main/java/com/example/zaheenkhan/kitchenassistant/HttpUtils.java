@@ -28,6 +28,10 @@ public class HttpUtils {
         client.put(context ,getAbsoluteUrl(url), params,"application/json", responseHandler);
     }
 
+    public static void delete(Context context, String url, StringEntity params,AsyncHttpResponseHandler responseHandler) {
+        client.delete(context ,getAbsoluteUrl(url), params,"application/json", responseHandler);
+    }
+
     private static String getAbsoluteUrl(String relativeUrl) {
         return BASE_URL + relativeUrl;
     }

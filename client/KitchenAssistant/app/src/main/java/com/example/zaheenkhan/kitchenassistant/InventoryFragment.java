@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -58,6 +59,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
     ArrayList<Row> rows = new ArrayList<Row>();
     ArrayList<Inventory> items = new ArrayList<Inventory>();
     ArrayList<Ingredient> dropList = new ArrayList<Ingredient>();
+    String[] dropArray = new String[]{};
     ArrayAdapter<String> dropAdapter = null;
 
     @Nullable
@@ -67,6 +69,8 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         Button b = (Button) view.findViewById(R.id.b_addItem);
         b.setOnClickListener(this);
         b = (Button)view.findViewById(R.id.b_save);
+        b.setOnClickListener(this);
+        b = (Button)view.findViewById(R.id.b_deleteItems);
         b.setOnClickListener(this);
         return view;
     }
@@ -89,23 +93,19 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
                     Inventory[] response = mapper.readValue(jsonObject.toString(), Inventory[].class);
                     items.addAll(Arrays.asList(response));
-                    //tt.setText(response.getIngredient().toString());
-
-
-
-
                     int index = 0;
 //                    tt.setText(response.getIngredient().getName());
 //                    addRow(getView());
 //                        rows.get(index).actv.setText(response.getIngredient().getName());
 //                        rows.get(index).et.setText(response.getQuantity()+"");
                     for(Inventory item: response){
-                        addRow(getView());
+                        addRow(getView(),item);
                         rows.get(index).actv.setText(item.getIngredient().getName());
                         dropAdapter.remove(item.getIngredient().getName());
                         dropAdapter.notifyDataSetChanged();
                         rows.get(index).et.setText(item.getQuantity()+"");
                         rows.get(index).tv.setText(item.getIngredient().getMeasurementType());
+                        //rows.get(index).it = item;
                         index++;
                     }
 //                    if(index < 3){
@@ -117,7 +117,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 //                    addRow(getView());
 //                        rows.get(0).actv.setText(jsonObject.getJSONObject(0).getString("id"));
 //                        rows.get(0).et.setText(jsonObject.getJSONObject(0).getString("Quantity")+"");
-                    tt.setText(String.format("Index : %d ",index));
+                    //tt.setText(String.format("Index : %d ",index));
                     Toast.makeText(getActivity(), "Check the inventory tab for your saved grocery!", Toast.LENGTH_LONG).show();
                 } catch (Exception e)
                 {
@@ -135,48 +135,25 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
     }
 
-    public void addRow(View v){
+    public void addRow(View v,Inventory it){
         LinearLayout ll = (LinearLayout)getView().findViewById(R.id.ll_itemsList);
-        LinearLayout row = new LinearLayout(getActivity());
+        final LinearLayout row = new LinearLayout(getActivity());
         row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        row.setLongClickable(true);
         AutoCompleteTextView at = getAutoCompleteTextView();
         final TextView tv = new TextView(getActivity());
-        at.setWidth(550);
+        at.setWidth(500);
         at.setHint("Item");
         EditText et = new EditText(getActivity());
         et.setInputType(InputType.TYPE_CLASS_NUMBER);
-        et.setWidth(300);
+        et.setWidth(250);
         et.setHint("Qty");
         tv.setWidth(250);
         row.addView(at);
         row.addView(et);
         row.addView(tv);
         ll.addView(row);
-        at.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                tv.setText(dropList.get(position).getMeasurementType());
-                items.get(items.size()-1).setIngredient(dropList.get(position));
-//                if (items.get(items.size()-1).getIngredient()!=null)
-//                {
-//                    Ingredient newOne = dropList.get(position);
-//                    int oldPos = dropAdapter.getPosition(items.get(items.size()-1).getIngredient().getName());
-//                    dropAdapter.remove(items.get(items.size()-1).getIngredient().getName());
-//                    dropAdapter.insert(newOne.getName(),oldPos);
-//                    dropList.set(position,items.get(items.size()-1).getIngredient());
-//
-//                    items.get(items.size()-1).setIngredient(newOne);
-//                }
-//                else
-//                {
-//                    items.get(items.size()-1).setIngredient(dropList.get(position));
-//                    dropList.remove(position);
-//                }
-
-            }
-        });
-        rows.add(new Row(at, et,tv));
+        rows.add(new Row(at, et,tv,it));
     }
 
     @Override
@@ -184,54 +161,122 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         switch (view.getId()){
             case R.id.b_addItem:
                 Inventory newItem = new Inventory();
-                items.add(newItem);
-                addRow(view);
+                //items.add(newItem);
+                addRow(view,newItem);
                 break;
             case R.id.b_save:
+                deleteItems(true);
                 save();
                 break;
+            case R.id.b_deleteItems:
+                deleteItems(false);
+                break;
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    public void deleteItems(boolean submit){
+        LinearLayout ll = (LinearLayout)getView().findViewById(R.id.ll_itemsList);
+        final Button delButton = getView().findViewById(R.id.b_deleteItems);
+        final TextView tt = getView().findViewById(R.id.tt1);
+        boolean flag = true;
+        if (delButton.getText().equals("DELETE ITEMS"))
+            delButton.setText("CANCEL");
+        else {
+            delButton.setText("DELETE ITEMS");
+            flag = false;
+        }
+        if (submit)
+        {
+            if (flag) {
+                //This means the submit button was pressed but delete items checkbox was not active
+                //reset button text back to normal and return nothing to delete
+                delButton.setText("DELETE ITEMS");
+                return;
+            }
+            ArrayList<Inventory> deleteList = new ArrayList<>();
+            try {
+                for (int i = 0; i < ll.getChildCount(); i++) {
+                    LinearLayout v = (LinearLayout) ll.getChildAt(i);
+                    CheckBox delB = (CheckBox) v.getChildAt(0);
+                    if (delB.isChecked())
+                    {
+                        if (!rows.get(i).it.getId().contentEquals("-1")){
+                            deleteList.add(rows.get(i).it);
+                        }
+                        ll.removeViewAt(i);
+                        rows.remove(i);
+                        //items.remove(i);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(getActivity(), "Could not save changes to Inventory", Toast.LENGTH_LONG).show();
+                tt.setText(e.toString());
+                //tt.setText(String.format("index: %d exc: %d  %s", index, exc, e.getStackTrace()[1].toString()));
+            }
+            if (!deleteList.isEmpty()) {
+                Gson gson = new GsonBuilder().create();
+                JsonArray itemsList = gson.toJsonTree(deleteList).getAsJsonArray();
+                StringEntity params = null;
+                try {
+                    params = new StringEntity(itemsList.toString());
+                    //tt.setText(params.toString());
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                HttpUtils.delete(getContext(),"/api/inventory/1", params, new JsonHttpResponseHandler(){
+                    public void onSuccess(int statusCode, PreferenceActivity.Header[] headers, Objects response) {
+                        Toast.makeText(getActivity(), "Successfully deleted items", Toast.LENGTH_LONG).show();
+                    }
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        Toast.makeText(getActivity(), "Could not delete items", Toast.LENGTH_LONG).show();
+                        tt.setText("failure");
+                    }
+
+                });
+            }
+            else
+                Toast.makeText(getActivity(), "Nothing to delete", Toast.LENGTH_LONG).show();
+        }
+        for (int i = 0; i < ll.getChildCount(); i++) {
+            LinearLayout v = (LinearLayout) ll.getChildAt(i);
+            if (flag) {
+                CheckBox del = new CheckBox(getActivity());
+                v.addView(del, 0);
+            }
+            else
+            {
+                v.removeViewAt(0);
+            }
+        }
+
     }
 
     @SuppressLint({"ResourceType", "DefaultLocale"})
     public void save(){
         final TextView tt = getView().findViewById(R.id.tt1);
-        int index =0;
         int exc = 0;
-        ArrayList<Inventory> saveItems = new ArrayList<>(items);
+        ArrayList<Inventory> saveItems = new ArrayList<>();
         try {
             for(Row row: rows){
                 if(row.actv.getText().toString().trim().length() != 0
                         &&
                         row.et.getText().toString().trim().length() != 0){
                     //items.add(new Inventory(row.actv.getText().toString(), row.et.getText().toString()));
-                    if (!Objects.equals(items.get(index++).getQuantity(), row.et.getText().toString().trim()) &&
-                            !Objects.equals(row.et.getText().toString().trim(), "0")) {
-                        saveItems.get(index-1-exc).setQuantity(row.et.getText().toString().trim());
-                        saveItems.get(index-1-exc).setUpdatedAt(Calendar.getInstance().getTime().toString());
-                        items.get(index-1).setQuantity(row.et.getText().toString().trim());
-                        items.get(index-1).setUpdatedAt(Calendar.getInstance().getTime().toString());
+                    if (!Objects.equals(row.it.getQuantity(), row.et.getText().toString().trim())) {
 
-                        if (row.actv.getText().toString().trim().length() != 0)
-                        {
-                            Ingredient selected = saveItems.get(index-1-exc).getIngredient();
-                            //saveItems.get(index-1-exc).setIngredient(selected);
-                            saveItems.get(index-1-exc).setIngredientId(selected.getId());
-                            saveItems.get(index-1-exc).setItemid(selected.getId());
-                            saveItems.get(index-1-exc).setUserId("1");
-                            saveItems.get(index-1-exc).setCreatedAt(Calendar.getInstance().getTime().toString());
-                        }
-                        tt.setText(String.format("updated on index: %d exc: %d, value: %s", index, exc,saveItems.get(index-1-exc).toString()));
-                    }
-                    else
-                    {
-                        saveItems.remove(index-1-exc);
+                        row.it.setQuantity(row.et.getText().toString().trim());
+                        row.it.setUpdatedAt(Calendar.getInstance().getTime().toString());
+
+                        saveItems.add(row.it);
                         exc++;
+                        //tt.setText(String.format("updated on index: %d exc: %d, value: %s", index, exc,saveItems.get(index-1-exc).toString()));
                     }
                 }
             }
             //tt.setText(String.format("index: %d exc: %d", index, exc));
-            if (exc==index)
+            if (exc==0)
             {
                 Toast.makeText(getActivity(), "Inventory already upto date. Nothing to save", Toast.LENGTH_LONG).show();
                 return;
@@ -255,7 +300,9 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
             e.printStackTrace();
         }
         HttpUtils.put(getContext(),"/api/inventory/1", params, new JsonHttpResponseHandler(){
-            public void onSuccess(int statusCode, PreferenceActivity.Header[] headers, Objects response) {
+            public void onSuccess(int statusCode, Header[] headers, String response) {
+                TextView tt = getView().findViewById(R.id.tt1);
+                tt.setText(response);
                 Toast.makeText(getActivity(), "Successfully saved", Toast.LENGTH_LONG).show();
             }
             public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
@@ -290,10 +337,11 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                                      ) {
                                     arry.add(item.getName());
                                 }
-                                final String[] ITEMS = arry.toArray(new String[arry.size()]);
+                                dropArray = arry.toArray(new String[arry.size()]);
 
 
-                                dropAdapter.addAll(ITEMS);
+
+                                dropAdapter.addAll(dropArray);
                                 textView.setAdapter(dropAdapter);
                                 dropAdapter.notifyDataSetChanged();
 
@@ -308,7 +356,42 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                     });
         } else {
             textView.setAdapter(dropAdapter);
+            dropAdapter.notifyDataSetChanged();
         }
+        textView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @SuppressLint("DefaultLocale")
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                for (int i=0;i<rows.size();i++){
+                    if (rows.get(i).actv.getOnItemClickListener() == this)
+                    {
+                        if (rows.get(i).it.getItemid().contentEquals("-1")){
+                            rows.get(i).it.setCreatedAt(Calendar.getInstance().getTime().toString());
+                            rows.get(i).it.setUserId("1");
+                        }
+                        String selected = (String) parent.getItemAtPosition(position);
+                        position = Arrays.asList(dropArray).indexOf(selected);
+                        rows.get(i).it.setUpdatedAt(Calendar.getInstance().getTime().toString());
+                        rows.get(i).it.setItemid(dropList.get(position).getId());
+                        rows.get(i).it.setIngredientId(dropList.get(position).getId());
+                        rows.get(i).it.setIngredient(dropList.get(position));
+
+                        //changing quantity value to trigger a save action of the ingredient when the button is pressed.
+                        //this needs to be changed. not a good way to detect change in the ingredient type
+                        rows.get(i).it.setQuantity(String.valueOf(Integer.parseInt(rows.get(i).it.getQuantity())-1));
+
+                        rows.get(i).tv.setText(dropList.get(position).getMeasurementType());
+                        TextView tt = getView().findViewById(R.id.tt1);
+                        tt.setText(String.format("The call to onItemClick. position:%d, i:%d",position,i));
+                        break;
+                    }
+                }
+                //tv.setText(dropList.get(position).getMeasurementType());
+                //items.get(items.size()-1).setIngredient(dropList.get(position));
+
+            }
+        });
         textView.setThreshold(0);
         textView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -323,10 +406,12 @@ class Row{
     AutoCompleteTextView actv;
     EditText et;
     TextView tv;
-    Row(AutoCompleteTextView p_actv, EditText p_et, TextView p_tv){
+    Inventory it;
+    Row(AutoCompleteTextView p_actv, EditText p_et, TextView p_tv,Inventory p_it){
         actv = p_actv;
         et = p_et;
         tv = p_tv;
+        it = p_it;
     }
 }
 
