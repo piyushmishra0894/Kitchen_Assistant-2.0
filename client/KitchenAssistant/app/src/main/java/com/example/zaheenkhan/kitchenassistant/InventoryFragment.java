@@ -62,6 +62,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
     String[] dropArray = new String[]{};
     ArrayAdapter<String> dropAdapter = null;
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -101,6 +102,8 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                     for(Inventory item: response){
                         addRow(getView(),item);
                         rows.get(index).actv.setText(item.getIngredient().getName());
+                        rows.get(index).actv.setCursorVisible(false);
+                        rows.get(index).actv.setEnabled(false);
                         dropAdapter.remove(item.getIngredient().getName());
                         dropAdapter.notifyDataSetChanged();
                         rows.get(index).et.setText(item.getQuantity()+"");
@@ -136,7 +139,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
     }
 
     public void addRow(View v,Inventory it){
-        LinearLayout ll = (LinearLayout)getView().findViewById(R.id.ll_itemsList);
+        final LinearLayout ll = (LinearLayout)getView().findViewById(R.id.ll_itemsList);
         final LinearLayout row = new LinearLayout(getActivity());
         row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         row.setLongClickable(true);
@@ -152,7 +155,12 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         row.addView(at);
         row.addView(et);
         row.addView(tv);
-        ll.addView(row);
+        ll.post(new Runnable() {
+
+            public void run() {
+                ll.addView(row);
+            }
+        });
         rows.add(new Row(at, et,tv,it));
     }
 
@@ -308,6 +316,17 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
             public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                 Toast.makeText(getActivity(), "Could not read your data", Toast.LENGTH_LONG).show();
                 tt.setText("failure");
+            }
+
+            public void onFinish(){
+                Toast.makeText(getActivity(), "Successfully finished saving", Toast.LENGTH_LONG).show();
+                final LinearLayout ll = (LinearLayout)getView().findViewById(R.id.ll_itemsList);
+                View sv2 = getView().findViewById(R.id.scrollView2);
+                sv2.invalidate();
+                sv2.postInvalidate();
+                ll.forceLayout();
+                //ll.postInvalidate();
+                //ll.invalidate();
             }
 
         });
