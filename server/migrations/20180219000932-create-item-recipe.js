@@ -1,33 +1,25 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Recipes', {
+    return queryInterface.createTable('ItemRecipes', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      Name: {
+      StepName: {
         type: Sequelize.STRING
       },
-      Step: {
-        type: Sequelize.STRING
+      StepNumber: {
+        type: Sequelize.INTEGER
       },
-      Ingredient: {
+      StepDescription: {
         type: Sequelize.STRING
-      }
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
       }
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Recipes');
+    return queryInterface.dropTable('ItemRecipes');
   }
 };
