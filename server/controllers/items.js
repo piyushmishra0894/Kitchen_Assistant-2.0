@@ -31,7 +31,8 @@ retrieve(req, res) {
      console.log(item)
      if(item[0] == null){
         res.status(201).send('no recipe available with given ingredients');
-       //console.log("no matching recipe")} 
+       //console.log("no matching recipe")
+      } 
       else {
      res.status(201).send(item);
      }
