@@ -19,5 +19,7 @@ module.exports = (app) => {
  app.get('/api/itemrecipes/:id', itemrecipesController.retrieve);
  app.get('/api/itemingredientmapping', itemingredientmappingController.retrieve);
  app.get('/api/items', itemsController.retrieve);
+ app.get('/api/items/recipesuggestion/:id', itemsController.findRecipe);
+
 
 };
