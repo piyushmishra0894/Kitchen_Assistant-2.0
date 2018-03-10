@@ -20,6 +20,6 @@ module.exports = (app) => {
  app.get('/api/itemingredientmapping', itemingredientmappingController.retrieve);
  app.get('/api/items', itemsController.retrieve);
  app.get('/api/items/recipesuggestion/:id', itemsController.findRecipe);
-
+ app.get('/api/items/recipetags/:id', itemsController.findRecipebWithTags);
 
 };
