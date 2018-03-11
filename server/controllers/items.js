@@ -69,7 +69,21 @@ findRecipe(req,res){
         res.status(200).send(item);
       })
       .catch(error => res.status(400).send(error))
-    }
+    },
+
+    completeRecipe(req, res){
+      console.log("came here")
+      userId = req.params.id
+      Recipe = req.query.item
+      console.log("unde" + Recipe)
+      db.sequelize.query('CALL cursor_delete(:user, :recipe);', 
+      { replacements: { user: userId, recipe: Recipe}} 
+    ).then(
+      //console.log("done")
+      res.status(200).send("Updated Inventory")
+    )
+    .catch(error => res.status(400).send(error))
+  }
   }
   
 
