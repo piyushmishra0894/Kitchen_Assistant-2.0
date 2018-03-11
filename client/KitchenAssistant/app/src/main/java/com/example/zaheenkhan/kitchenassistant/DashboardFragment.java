@@ -9,12 +9,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
+
+import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -23,6 +27,23 @@ import cz.msebera.android.httpclient.Header;
  */
 
 public class DashboardFragment extends Fragment {
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        try{
+            super.setUserVisibleHint(isVisibleToUser);
+            if (isVisibleToUser) {
+                if(getView() != null){
+                    final LinearLayout ll = (LinearLayout) getView().findViewById(R.id.ll_itemsLayout);
+                    ll.removeAllViews();
+                    onViewCreated(getView(), null);
+                }
+            }
+        }
+        catch (Exception ex){
+            String x = ex.toString();
+        }
+    }
 
     @Nullable
     @Override
@@ -33,7 +54,7 @@ public class DashboardFragment extends Fragment {
 
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         final LinearLayout ll_itemsLayout = view.findViewById(R.id.ll_itemsLayout);
-        HttpUtils.get("/api/items", null, new JsonHttpResponseHandler(){
+        HttpUtils.get("/api/items/recipesuggestion/1", null, new JsonHttpResponseHandler(){
             public void onSuccess(int statusCode, Header[] headers, final JSONArray jsonObject) {
                 ObjectMapper mapper = new ObjectMapper();
 
@@ -50,14 +71,14 @@ public class DashboardFragment extends Fragment {
 
                                 try{
                                     ItemRecipe[] itemRecipes = mapper.readValue(innerJsonObject.toString(), ItemRecipe[].class);
-                                    item.setItemRecipes(itemRecipes);
+                                    item.setItemRecipe(itemRecipes);
                                     final TextView tv = new TextView(getActivity());
                                     tv.setText(item.getName() + "+");
                                     tv.setHeight(100);
                                     tv.setTextSize(20);
                                     ll_itemsLayout.addView(tv);
                                     final TextView innerTextView = new TextView(getActivity());
-                                    for(ItemRecipe recipe: item.getItemRecipes()){
+                                    for(ItemRecipe recipe: item.getItemRecipe()){
 
                                         innerTextView.setText(innerTextView.getText() +
                                                 recipe.getStepNumber() + ". " + recipe.getStepName()+":" + recipe.getStepDescription() + "\n");
@@ -84,14 +105,18 @@ public class DashboardFragment extends Fragment {
                                 }
 
                             }
-                        });
+                        }
+                        );
 
                     }
 
                 }
                 catch (Exception ex){
-
+                    Toast.makeText(getActivity(), "Seems like you do not have enough in your inventory! Please add grocery.", Toast.LENGTH_LONG).show();
                 }
+            }
+            public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                Toast.makeText(getActivity(), "Seems like you do not have enough in your inventory! Please add grocery.", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -103,38 +128,83 @@ public class DashboardFragment extends Fragment {
 //Classes!
 class Item
 {
-    private String updatedAt;
+    private String Salad;
 
-    private String Name;
+    private String breakfast;
+
+    private String Desserts;
+
+    private String brunch;
 
     private String id;
 
+    private String Name;
+
+    private String updatedAt;
+
+    private String dinner;
+
+    private String Appetizer;
+
+    private String Soup;
+
     private String createdAt;
 
-    private ItemRecipe[] itemRecipes;
+    @JsonProperty("Fast-Food")
+    private String FastFood;
 
-    public ItemRecipe[] getItemRecipes() {return itemRecipes; }
+    private String calories;
 
-    public void setItemRecipes(ItemRecipe[] itemRecipes) {this.itemRecipes = itemRecipes; }
+    private String timeToPrepare;
 
-    public String getUpdatedAt ()
-{
-    return updatedAt;
-}
+    private ItemRecipe[] itemRecipe;
 
-    public void setUpdatedAt (String updatedAt)
-    {
-        this.updatedAt = updatedAt;
+    public ItemRecipe[] getItemRecipe(){
+        return itemRecipe;
     }
 
-    public String getName ()
-    {
-        return Name;
+    public void setItemRecipe(ItemRecipe[] itemRecipe){
+        this.itemRecipe = itemRecipe;
     }
 
-    public void setName (String Name)
+    public String getSalad ()
     {
-        this.Name = Name;
+        return Salad;
+    }
+
+    public void setSalad (String Salad)
+    {
+        this.Salad = Salad;
+    }
+
+    public String getBreakfast ()
+    {
+        return breakfast;
+    }
+
+    public void setBreakfast (String breakfast)
+    {
+        this.breakfast = breakfast;
+    }
+
+    public String getDesserts ()
+    {
+        return Desserts;
+    }
+
+    public void setDesserts (String Desserts)
+    {
+        this.Desserts = Desserts;
+    }
+
+    public String getBrunch ()
+    {
+        return brunch;
+    }
+
+    public void setBrunch (String brunch)
+    {
+        this.brunch = brunch;
     }
 
     public String getId ()
@@ -147,6 +217,56 @@ class Item
         this.id = id;
     }
 
+    public String getName ()
+    {
+        return Name;
+    }
+
+    public void setName (String Name)
+    {
+        this.Name = Name;
+    }
+
+    public String getUpdatedAt ()
+{
+    return updatedAt;
+}
+
+    public void setUpdatedAt (String updatedAt)
+    {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getDinner ()
+    {
+        return dinner;
+    }
+
+    public void setDinner (String dinner)
+    {
+        this.dinner = dinner;
+    }
+
+    public String getAppetizer ()
+    {
+        return Appetizer;
+    }
+
+    public void setAppetizer (String Appetizer)
+    {
+        this.Appetizer = Appetizer;
+    }
+
+    public String getSoup ()
+    {
+        return Soup;
+    }
+
+    public void setSoup (String Soup)
+    {
+        this.Soup = Soup;
+    }
+
     public String getCreatedAt ()
 {
     return createdAt;
@@ -157,10 +277,40 @@ class Item
         this.createdAt = createdAt;
     }
 
+    public String getFastFood ()
+{
+    return FastFood;
+}
+
+    public void setFastFood (String FastFood)
+{
+    this.FastFood = FastFood;
+}
+
+    public String getCalories ()
+    {
+        return calories;
+    }
+
+    public void setCalories (String calories)
+    {
+        this.calories = calories;
+    }
+
+    public String getTimeToPrepare ()
+    {
+        return timeToPrepare;
+    }
+
+    public void setTimeToPrepare (String timeToPrepare)
+    {
+        this.timeToPrepare = timeToPrepare;
+    }
+
     @Override
     public String toString()
     {
-        return "ClassPojo [updatedAt = "+updatedAt+", Name = "+Name+", id = "+id+", createdAt = "+createdAt+"]";
+        return "ClassPojo [Salad = "+Salad+", breakfast = "+breakfast+", Desserts = "+Desserts+", brunch = "+brunch+", id = "+id+", Name = "+Name+", updatedAt = "+updatedAt+", dinner = "+dinner+", Appetizer = "+Appetizer+", Soup = "+Soup+", createdAt = "+createdAt+", Fast-Food = "+FastFood+", calories = "+calories+", timeToPrepare = "+timeToPrepare+"]";
     }
 }
 
