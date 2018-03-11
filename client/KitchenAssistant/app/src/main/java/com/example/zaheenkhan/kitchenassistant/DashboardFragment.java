@@ -84,7 +84,7 @@ public class DashboardFragment extends Fragment {
                                             for (ItemRecipe recipe : item.getItemRecipe()) {
 
                                                 innerTextView.setText(innerTextView.getText() +
-                                                        recipe.getStepNumber() + ". " + recipe.getStepName() + ":" + recipe.getStepDescription() + "\n");
+                                                        recipe.getStepNumber() + ". " + recipe.getStepName() + ": " + recipe.getStepDescription() + "\n");
 
                                             }
                                             innerTextView.setVisibility(View.VISIBLE);

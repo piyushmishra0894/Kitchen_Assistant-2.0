@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity
         final Button button = findViewById(R.id.button);
         final List<Pair<String,String>> myList = new ArrayList<>();
         myList.add((new Pair<String,String>("name" , "jithin")));
-        final TextView tt = findViewById(R.id.tt);
+        //final TextView tt = findViewById(R.id.tt);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -98,18 +98,17 @@ public class MainActivity extends AppCompatActivity
                     public void onSuccess(@Nullable JsonElement jsonElement) {
 
                         try {
-                            tt.setText(result.get().toString());
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
+                            //tt.setText(result.get().toString());
+                            String x = "";
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
 
                     @Override
                     public void onFailure(Throwable throwable) {
-                        TextView tt = findViewById(R.id.tt);
-                        tt.setText(throwable.toString());
+                        //TextView tt = findViewById(R.id.tt);
+                        //tt.setText(throwable.toString());
                     }
                 });
 
@@ -118,14 +117,14 @@ public class MainActivity extends AppCompatActivity
 
         callbackManager = CallbackManager.Factory.create();
 
-        final Button db_button = findViewById(R.id.button2);
+        /*final Button db_button = findViewById(R.id.button2);
         db_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i1 = new Intent(MainActivity.this,DashboardActivity.class);
                 startActivity(i1);
             }
-        });
+        });*/
 
 
 //        final AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
@@ -165,7 +164,7 @@ public class MainActivity extends AppCompatActivity
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        tt.setText(payload.toString());
+                        //tt.setText(payload.toString());
                         ListenableFuture<MobileServiceUser> mLogin = mClient.login("facebook", payload.toString());
                         Futures.addCallback(mLogin, new FutureCallback<MobileServiceUser>() {
                             @Override
@@ -175,7 +174,7 @@ public class MainActivity extends AppCompatActivity
                             @Override
                             public void onSuccess(MobileServiceUser user) {
 //                                alert11.show();
-                                logbox.setText("Login Success");
+                                //logbox.setText("Login Success");
                                 Intent i1 = new Intent(MainActivity.this,DashboardActivity.class);
                                 startActivity(i1);
 
