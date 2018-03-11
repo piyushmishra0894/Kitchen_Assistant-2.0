@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.TextHttpResponseHandler;
 
 import org.json.JSONArray;
 
@@ -91,8 +93,10 @@ public class DashboardFragment extends Fragment {
                                             b_delete.setOnClickListener(new View.OnClickListener(){
                                                 @Override
                                                 public void onClick(View v){
-                                                    HttpUtils.get("api/items/completecooking/1?item=" + item.getId(), null, new JsonHttpResponseHandler() {
-                                                        public void onSuccess(int statusCode, Header[] headers, final JSONArray innerJsonObject) {
+                                                    RequestParams params = new RequestParams();
+                                                    params.add("item", item.getId());
+                                                    HttpUtils.get("/api/items/completecooking/1", params, new TextHttpResponseHandler() {
+                                                        public void onSuccess(int statusCode, Header[] headers, String response) {
                                                             Toast.makeText(getActivity(), "Congratulations, your inventory has been updated accordingly!", Toast.LENGTH_LONG).show();
                                                         }
                                                         public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
