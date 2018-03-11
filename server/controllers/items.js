@@ -78,10 +78,11 @@ findRecipe(req,res){
       console.log("unde" + Recipe)
       db.sequelize.query('CALL cursor_delete(:user, :recipe);', 
       { replacements: { user: userId, recipe: Recipe}} 
-    ).then(r => {
+    ).then(
       //console.log("done")
-      res.status(200).send("Updated Inventory");
-    }).catch(error => res.status(400).send(error))
+      res.status(200).send("Updated Inventory")
+    )
+    .catch(error => res.status(400).send(error))
   }
   }
   
