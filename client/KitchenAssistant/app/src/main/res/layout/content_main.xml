@@ -21,7 +21,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.465">
+        app:layout_constraintVertical_bias="0.0">
 
         <TextView
             android:id="@+id/textView2"
@@ -90,19 +90,6 @@
             tools:layout_editor_absoluteX="90dp"
             tools:layout_editor_absoluteY="357dp" />
 
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="DASHBOARD" />
-
-        <TextView
-            android:id="@+id/tt"
-            android:layout_width="match_parent"
-            android:layout_height="86dp"
-            android:text="TextView"
-            android:textSize="12sp" />
-
 
         <com.facebook.login.widget.LoginButton
             android:id="@+id/login_button"
@@ -115,8 +102,7 @@
         <TextView
             android:id="@+id/logbox"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 

@@ -95,7 +95,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         params.add("id", "1");
         dropAdapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_dropdown_item_1line);
-        final TextView tt = view.findViewById(R.id.tt1);
+        //final TextView tt = view.findViewById(R.id.tt1);
 
         //tt.setText("before");
         HttpUtils.get("/api/inventory/1", params, new JsonHttpResponseHandler(){
@@ -170,14 +170,14 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                 } catch (Exception e)
                 {
                     Toast.makeText(getActivity(), "Could not read your saved grocery"+e.toString(), Toast.LENGTH_LONG).show();
-                    tt.setText(e.toString());
+                    //tt.setText(e.toString());
                     e.printStackTrace();
                 }
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                 Toast.makeText(getActivity(), "Could not read your data", Toast.LENGTH_LONG).show();
-                tt.setText("failure");
+                //tt.setText("failure");
             }
         });
 
@@ -231,7 +231,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
     public void deleteItems(boolean submit){
         LinearLayout ll = (LinearLayout)getView().findViewById(R.id.ll_itemsList);
         final Button delButton = getView().findViewById(R.id.b_deleteItems);
-        final TextView tt = getView().findViewById(R.id.tt1);
+        //final TextView tt = getView().findViewById(R.id.tt1);
         boolean flag = true;
         if (delButton.getText().equals("DELETE ITEMS"))
             delButton.setText("CANCEL");
@@ -266,7 +266,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
             } catch (Exception e) {
                 e.printStackTrace();
                 Toast.makeText(getActivity(), "Could not save changes to Inventory", Toast.LENGTH_LONG).show();
-                tt.setText(e.toString());
+                //tt.setText(e.toString());
                 //tt.setText(String.format("index: %d exc: %d  %s", index, exc, e.getStackTrace()[1].toString()));
             }
             if (!deleteList.isEmpty()) {
@@ -285,7 +285,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                     }
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         Toast.makeText(getActivity(), "Could not delete items", Toast.LENGTH_LONG).show();
-                        tt.setText("failure");
+                        //tt.setText("failure");
                     }
 
                 });
@@ -310,7 +310,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
     @SuppressLint({"ResourceType", "DefaultLocale"})
     public void save(){
         ((DashboardActivity)getActivity()).setBillData("");
-        final TextView tt = getView().findViewById(R.id.tt1);
+        //final TextView tt = getView().findViewById(R.id.tt1);
         int exc = 0;
         ArrayList<Inventory> saveItems = new ArrayList<>();
         try {
@@ -339,7 +339,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getActivity(), "Could not save changes to Inventory", Toast.LENGTH_LONG).show();
-            tt.setText(e.toString());
+            //tt.setText(e.toString());
             //tt.setText(String.format("index: %d exc: %d  %s", index, exc, e.getStackTrace()[1].toString()));
         }
         Gson gson = new GsonBuilder().create();
@@ -356,13 +356,13 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         }
         HttpUtils.put(getContext(),"/api/inventory/1", params, new JsonHttpResponseHandler(){
             public void onSuccess(int statusCode, Header[] headers, String response) {
-                TextView tt = getView().findViewById(R.id.tt1);
-                tt.setText(response);
+                //TextView tt = getView().findViewById(R.id.tt1);
+                //tt.setText(response);
                 Toast.makeText(getActivity(), "Successfully saved", Toast.LENGTH_LONG).show();
             }
             public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                 Toast.makeText(getActivity(), "Could not read your data", Toast.LENGTH_LONG).show();
-                tt.setText("failure");
+                //tt.setText("failure");
             }
 
             public void onFinish(){
@@ -382,7 +382,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
     public AutoCompleteTextView getAutoCompleteTextView(boolean isNew){
 
-        final TextView tt = getView().findViewById(R.id.tt1);
+        //final TextView tt = getView().findViewById(R.id.tt1);
         final AutoCompleteTextView textView = new AutoCompleteTextView(getActivity());
         RequestParams params = new RequestParams();
         if (isNew) {
@@ -414,7 +414,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                             catch (Exception e)
                             {
                                 Toast.makeText(getActivity(), "Could not read your saved grocery"+e.toString(), Toast.LENGTH_LONG).show();
-                                tt.setText(e.toString());
+                                //tt.setText(e.toString());
                                 e.printStackTrace();
                             }
                         }
@@ -451,8 +451,8 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                         rows.get(i).it.setQuantity(String.valueOf(Integer.parseInt(rows.get(i).it.getQuantity())-1));
 
                         rows.get(i).tv.setText(dropList.get(position).getMeasurementType());
-                        TextView tt = getView().findViewById(R.id.tt1);
-                        tt.setText(String.format("The call to onItemClick. position:%d, i:%d",position,i));
+                        //TextView tt = getView().findViewById(R.id.tt1);
+                        //tt.setText(String.format("The call to onItemClick. position:%d, i:%d",position,i));
                         break;
                     }
                 }
