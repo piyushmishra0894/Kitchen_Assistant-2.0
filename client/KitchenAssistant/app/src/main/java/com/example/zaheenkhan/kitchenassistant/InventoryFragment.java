@@ -3,6 +3,7 @@ package com.example.zaheenkhan.kitchenassistant;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceActivity;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -63,6 +64,19 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
     ArrayAdapter<String> dropAdapter = null;
 
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            rows = new ArrayList<Row>();
+            items = new ArrayList<Inventory>();
+            final LinearLayout ll = (LinearLayout)getView().findViewById(R.id.ll_itemsList);
+            ll.removeAllViews();
+            onViewCreated(getView(), null);
+        }
+    }
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -76,12 +90,13 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
         return view;
     }
 
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(View view, @Nullable final Bundle savedInstanceState) {
         RequestParams params = new RequestParams();
         params.add("id", "1");
         dropAdapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_dropdown_item_1line);
         final TextView tt = view.findViewById(R.id.tt1);
+
         //tt.setText("before");
         HttpUtils.get("/api/inventory/1", params, new JsonHttpResponseHandler(){
             public void onSuccess(int statusCode, Header[] headers, JSONArray jsonObject) {
@@ -93,6 +108,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
 
                     Inventory[] response = mapper.readValue(jsonObject.toString(), Inventory[].class);
+
                     items.addAll(Arrays.asList(response));
                     int index = 0;
 //                    tt.setText(response.getIngredient().getName());
@@ -100,7 +116,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 //                        rows.get(index).actv.setText(response.getIngredient().getName());
 //                        rows.get(index).et.setText(response.getQuantity()+"");
                     for(Inventory item: response){
-                        addRow(getView(),item);
+                        addRow(getView(),item, false);
                         rows.get(index).actv.setText(item.getIngredient().getName());
                         rows.get(index).actv.setCursorVisible(false);
                         rows.get(index).actv.setEnabled(false);
@@ -111,6 +127,36 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                         //rows.get(index).it = item;
                         index++;
                     }
+
+                    String data = ((DashboardActivity)getActivity()).getBillData();
+                    if(data != null && !data.isEmpty()){
+                        if(data != null && data!=""){
+                            String[] additionalData = data.split("!##!");
+                            for(int i=0;i<additionalData.length;i++){
+                                Inventory item = new Inventory();
+                                Ingredient ing = new Ingredient();
+                                ing.setId(additionalData[i].split(",")[0]);
+                                ing.setName(additionalData[i].split(",")[1]);
+                                ing.setMeasurementType(additionalData[i].split(",")[3]);
+                                item.setQuantity(additionalData[i].split(",")[2]);
+                                item.setIngredient(ing);
+                                item.setIngredientId(ing.getId());
+                                item.setItemid(ing.getId());
+                                item.setUserId("1");
+                                addRow(getView(),item, false);
+                                rows.get(index).actv.setText(item.getIngredient().getName());
+                                rows.get(index).actv.setCursorVisible(false);
+                                rows.get(index).actv.setEnabled(false);
+                                dropAdapter.remove(item.getIngredient().getName());
+                                dropAdapter.notifyDataSetChanged();
+                                rows.get(index).et.setText(item.getQuantity()+"");
+                                rows.get(index).tv.setText(item.getIngredient().getMeasurementType());
+                                //rows.get(index).it = item;
+                                index++;
+                            }
+                        }
+                    }
+
 //                    if(index < 3){
 //                        addRow(getView());
 //                        index++;
@@ -121,7 +167,6 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 //                        rows.get(0).actv.setText(jsonObject.getJSONObject(0).getString("id"));
 //                        rows.get(0).et.setText(jsonObject.getJSONObject(0).getString("Quantity")+"");
                     //tt.setText(String.format("Index : %d ",index));
-                    Toast.makeText(getActivity(), "Check the inventory tab for your saved grocery!", Toast.LENGTH_LONG).show();
                 } catch (Exception e)
                 {
                     Toast.makeText(getActivity(), "Could not read your saved grocery"+e.toString(), Toast.LENGTH_LONG).show();
@@ -138,12 +183,12 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
     }
 
-    public void addRow(View v,Inventory it){
+    public void addRow(View v,Inventory it, boolean isNew){
         final LinearLayout ll = (LinearLayout)getView().findViewById(R.id.ll_itemsList);
         final LinearLayout row = new LinearLayout(getActivity());
         row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         row.setLongClickable(true);
-        AutoCompleteTextView at = getAutoCompleteTextView();
+        AutoCompleteTextView at = getAutoCompleteTextView(isNew);
         final TextView tv = new TextView(getActivity());
         at.setWidth(500);
         at.setHint("Item");
@@ -170,7 +215,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
             case R.id.b_addItem:
                 Inventory newItem = new Inventory();
                 //items.add(newItem);
-                addRow(view,newItem);
+                addRow(view,newItem, true);
                 break;
             case R.id.b_save:
                 deleteItems(true);
@@ -264,6 +309,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
     @SuppressLint({"ResourceType", "DefaultLocale"})
     public void save(){
+        ((DashboardActivity)getActivity()).setBillData("");
         final TextView tt = getView().findViewById(R.id.tt1);
         int exc = 0;
         ArrayList<Inventory> saveItems = new ArrayList<>();
@@ -273,7 +319,7 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
                         &&
                         row.et.getText().toString().trim().length() != 0){
                     //items.add(new Inventory(row.actv.getText().toString(), row.et.getText().toString()));
-                    if (!Objects.equals(row.it.getQuantity(), row.et.getText().toString().trim())) {
+                    if (true || !Objects.equals(row.it.getQuantity(), row.et.getText().toString().trim())) {
 
                         row.it.setQuantity(row.et.getText().toString().trim());
                         row.it.setUpdatedAt(Calendar.getInstance().getTime().toString());
@@ -334,12 +380,12 @@ public class InventoryFragment extends Fragment implements View.OnClickListener{
 
     }
 
-    public AutoCompleteTextView getAutoCompleteTextView(){
+    public AutoCompleteTextView getAutoCompleteTextView(boolean isNew){
 
         final TextView tt = getView().findViewById(R.id.tt1);
         final AutoCompleteTextView textView = new AutoCompleteTextView(getActivity());
         RequestParams params = new RequestParams();
-        if (dropList.isEmpty()) {
+        if (isNew) {
             if (items.size()>0)
             dropList.add(items.get(0).getIngredient());
             HttpUtils.get("/api/ingredients", params, new JsonHttpResponseHandler() {

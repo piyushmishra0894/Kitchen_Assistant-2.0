@@ -1,6 +1,7 @@
 package com.example.zaheenkhan.kitchenassistant;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -28,12 +29,62 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+
+
+//Additional imports
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.vision.v1.Vision;
+import com.google.api.services.vision.v1.VisionRequest;
+import com.google.api.services.vision.v1.VisionRequestInitializer;
+import com.google.api.services.vision.v1.model.AnnotateImageRequest;
+import com.google.api.services.vision.v1.model.BatchAnnotateImagesRequest;
+import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
+
+import com.google.api.services.vision.v1.model.EntityAnnotation;
+import com.google.api.services.vision.v1.model.Feature;
+import com.google.api.services.vision.v1.model.Image;
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONArray;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
+import cz.msebera.android.httpclient.Header;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -47,6 +98,16 @@ public class DashboardActivity extends AppCompatActivity {
     private static final int GALLERY_IMAGE_REQUEST = 1;
     public static final int CAMERA_PERMISSIONS_REQUEST = 2;
     public static final int CAMERA_IMAGE_REQUEST = 3;
+    Bitmap bitmap = null;
+    public String billData = "";
+
+    public String getBillData(){
+        return billData;
+    }
+
+    public void setBillData(String billData){
+        this.billData = billData;
+    }
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -171,7 +232,7 @@ public class DashboardActivity extends AppCompatActivity {
         if (uri != null) {
             try {
                 // scale the image to save on bandwidth
-                Bitmap bitmap =
+                bitmap =
                         scaleBitmapDown(
                                 MediaStore.Images.Media.getBitmap(getContentResolver(), uri),
                                 1200);
@@ -180,9 +241,11 @@ public class DashboardActivity extends AppCompatActivity {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 byte[] byteArray = stream.toByteArray();
 
-                Intent in1 = new Intent(getApplicationContext(), GoogleVisionAPI.class);
-                in1.putExtra("image",byteArray);
-                startActivity(in1);
+                Toast.makeText(getApplicationContext(), "Alright, we will navigate you to your inventory once your inventory is extracted from"
+                                +" the bill. Please give us some time :-)"
+                        , Toast.LENGTH_LONG).show();
+
+                new GoogleVisionAPI((TabLayout)findViewById(R.id.tabs)).execute();
 
             } catch (IOException e) {
                 Log.d("Camera", "Image picking failed because " + e.getMessage());
@@ -282,8 +345,7 @@ public class DashboardActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
 
-            switch (position)
-            {
+            switch (position) {
                 case 0:
                     DashboardFragment tab1 = new DashboardFragment();
                     return tab1;
@@ -305,8 +367,7 @@ public class DashboardActivity extends AppCompatActivity {
         @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position)
-            {
+            switch (position) {
                 case 0:
                     return "DASHBOARD";
 
@@ -316,9 +377,175 @@ public class DashboardActivity extends AppCompatActivity {
             }
             return null;
         }
+    }
 
-        private String getApiKey(){
+        private String getApiKey() {
             return "AIzaSyDEL63Zimixn8bIz-HVlHD8E9zYOvsmT6E";
         }
-    }
+
+        //Additional code!
+        private class GoogleVisionAPI extends AsyncTask<Object, Void, String> {
+            TabLayout tabLayout;
+
+            GoogleVisionAPI(TabLayout ptabLayout){
+                tabLayout = ptabLayout;
+            }
+
+            private static final String CLOUD_VISION_API_KEY = "AIzaSyDEL63Zimixn8bIz-HVlHD8E9zYOvsmT6E";
+            public static final String FILE_NAME = "temp.jpg";
+            private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
+            private static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
+
+            private final String TAG = MainActivity.class.getSimpleName();
+            private static final int GALLERY_PERMISSIONS_REQUEST = 0;
+            private static final int GALLERY_IMAGE_REQUEST = 1;
+            public static final int CAMERA_PERMISSIONS_REQUEST = 2;
+            public static final int CAMERA_IMAGE_REQUEST = 3;
+
+
+            @Override
+            protected void onPreExecute() {
+                ;
+            }
+
+            @Override
+            protected String doInBackground(Object... params) {
+                try {
+                    HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
+                    JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+
+                    VisionRequestInitializer requestInitializer =
+                            new VisionRequestInitializer(CLOUD_VISION_API_KEY) {
+                                /**
+                                 * We override this so we can inject important identifying fields into the HTTP
+                                 * headers. This enables use of a restricted cloud platform API key.
+                                 */
+                                @Override
+                                protected void initializeVisionRequest(VisionRequest<?> visionRequest)
+                                        throws IOException {
+                                    super.initializeVisionRequest(visionRequest);
+
+                                    visionRequest.getRequestHeaders().set(ANDROID_PACKAGE_HEADER, getPackageName());
+
+                                    String sig = PackageManagerUtils.getSignature(getPackageManager(), getPackageName());
+
+                                    visionRequest.getRequestHeaders().set(ANDROID_CERT_HEADER, sig);
+                                }
+                            };
+
+                    Vision.Builder builder = new Vision.Builder(httpTransport, jsonFactory, null);
+                    builder.setVisionRequestInitializer(requestInitializer);
+
+                    Vision vision = builder.build();
+
+                    BatchAnnotateImagesRequest batchAnnotateImagesRequest =
+                            new BatchAnnotateImagesRequest();
+                    batchAnnotateImagesRequest.setRequests(new ArrayList<AnnotateImageRequest>() {{
+                        AnnotateImageRequest annotateImageRequest = new AnnotateImageRequest();
+
+                        // Add the image
+                        Image base64EncodedImage = new Image();
+                        // Convert the bitmap to a JPEG
+                        // Just in case it's a format that Android understands but Cloud Vision
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
+                        byte[] imageBytes = byteArrayOutputStream.toByteArray();
+
+                        // Base64 encode the JPEG
+                        base64EncodedImage.encodeContent(imageBytes);
+                        annotateImageRequest.setImage(base64EncodedImage);
+
+                        // add the features we want
+                        annotateImageRequest.setFeatures(new ArrayList<Feature>() {{
+                            Feature textDetection = new Feature();
+                            textDetection.setType("DOCUMENT_TEXT_DETECTION");
+                            textDetection.setMaxResults(10);
+                            add(textDetection);
+                        }});
+
+                        // Add the list of one thing to the request
+                        add(annotateImageRequest);
+                    }});
+
+                    Vision.Images.Annotate annotateRequest =
+                            vision.images().annotate(batchAnnotateImagesRequest);
+                    // Due to a bug: requests to Vision API containing large images fail when GZipped.
+                    annotateRequest.setDisableGZipContent(true);
+                    Log.d(TAG, "created Cloud Vision request object, sending request");
+
+                    BatchAnnotateImagesResponse response = annotateRequest.execute();
+                    return convertResponseToString(response);
+
+                } catch (GoogleJsonResponseException e) {
+                    Log.d(TAG, "failed to make API request because " + e.getContent());
+                } catch (IOException e) {
+                    Log.d(TAG, "failed to make API request because of other IOException " +
+                            e.getMessage());
+                }
+                return "Cloud Vision API request failed. Check logs for details.";
+            }
+
+            protected void onPostExecute(final String result) {
+                //Save user inventory here with result.
+                String x = result;
+                HttpUtils.get("/api/ingredients", null, new JsonHttpResponseHandler() {
+                    public void onSuccess(int statusCode, Header[] headers, JSONArray jsonObject) {
+                        ObjectMapper mapper = new ObjectMapper();
+
+                        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+                        try {
+                            Ingredient[] response = mapper.readValue(jsonObject.toString(), Ingredient[].class);
+                            String[] lines = result.split("\n");
+                            List<Inventory> inventory = new ArrayList<Inventory>();
+                            String dataToBePassed = "";
+                            for (int i = 0; i < lines.length; i++) {
+                                for (Ingredient ingredient : response) {
+                                    if (lines[i].toLowerCase().contains(ingredient.getName().toLowerCase())) {
+                                        Inventory inv = new Inventory();
+                                        inv.setIngredientId(ingredient.getId());
+                                        inv.setItemid(ingredient.getId());
+                                        i+=2;
+                                        if(i<lines.length){
+                                            String[] str = lines[i].replaceAll("[^0-9]+", " ").split(" ");
+                                            if (str.length > 0 && str[0] != null && !str[0].isEmpty()) {
+                                                String q = str[0];
+                                                inv.setQuantity(q);
+                                                dataToBePassed += inv.getIngredientId() + ","+ingredient.getName() + "," + inv.getQuantity() +
+                                                        "," + ingredient.getMeasurementType() + "!##!";
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Toast.makeText(getApplicationContext(), "Please check your new inventory and click on Submit!", Toast.LENGTH_LONG).show();
+                            billData = dataToBePassed;
+                            TabLayout.Tab tab = tabLayout.getTabAt(1);
+                            tab.select();
+                        } catch (Exception ex) {
+                            String x = ex.toString();
+                        }
+                    }
+                });
+
+
+            }
+
+            private String convertResponseToString(BatchAnnotateImagesResponse response) {
+                String message = "I found these things:\n\n";
+
+                List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
+                if (labels != null) {
+                    for (EntityAnnotation label : labels) {
+                        message += String.format(Locale.US, "%.3f: %s", label.getScore(), label.getDescription());
+                        message += "\n";
+                    }
+                } else {
+                    message += "nothing";
+                }
+
+                return message;
+            }
+
+        }
 }
+
