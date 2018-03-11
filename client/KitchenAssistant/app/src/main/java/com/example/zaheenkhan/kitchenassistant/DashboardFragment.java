@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,52 +64,65 @@ public class DashboardFragment extends Fragment {
                 try {
                     Item[] response = mapper.readValue(jsonObject.toString(), Item[].class);
 
-                    for(final Item item: response) {
-                        HttpUtils.get("/api/itemrecipes/"+item.getId(), null, new JsonHttpResponseHandler() {
-                            public void onSuccess(int statusCode, Header[] headers, final JSONArray innerJsonObject) {
-                                ObjectMapper mapper = new ObjectMapper();
-                                mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+                    for(final Item item: response)
+                        HttpUtils.get("/api/itemrecipes/" + item.getId(), null, new JsonHttpResponseHandler() {
+                                    public void onSuccess(int statusCode, Header[] headers, final JSONArray innerJsonObject) {
+                                        ObjectMapper mapper = new ObjectMapper();
+                                        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 
-                                try{
-                                    ItemRecipe[] itemRecipes = mapper.readValue(innerJsonObject.toString(), ItemRecipe[].class);
-                                    item.setItemRecipe(itemRecipes);
-                                    final TextView tv = new TextView(getActivity());
-                                    tv.setText(item.getName() + "+");
-                                    tv.setHeight(100);
-                                    tv.setTextSize(20);
-                                    ll_itemsLayout.addView(tv);
-                                    final TextView innerTextView = new TextView(getActivity());
-                                    for(ItemRecipe recipe: item.getItemRecipe()){
+                                        try {
+                                            ItemRecipe[] itemRecipes = mapper.readValue(innerJsonObject.toString(), ItemRecipe[].class);
+                                            item.setItemRecipe(itemRecipes);
+                                            final TextView tv = new TextView(getActivity());
+                                            tv.setText(item.getName() + "-");
+                                            tv.setHeight(100);
+                                            tv.setTextSize(20);
+                                            ll_itemsLayout.addView(tv);
+                                            final TextView innerTextView = new TextView(getActivity());
+                                            for (ItemRecipe recipe : item.getItemRecipe()) {
 
-                                        innerTextView.setText(innerTextView.getText() +
-                                                recipe.getStepNumber() + ". " + recipe.getStepName()+":" + recipe.getStepDescription() + "\n");
+                                                innerTextView.setText(innerTextView.getText() +
+                                                        recipe.getStepNumber() + ". " + recipe.getStepName() + ":" + recipe.getStepDescription() + "\n");
+
+                                            }
+                                            innerTextView.setVisibility(View.VISIBLE);
+                                            ll_itemsLayout.addView(innerTextView);
+                                            Button b_delete = new Button(getActivity());
+                                            b_delete.setOnClickListener(new View.OnClickListener(){
+                                                @Override
+                                                public void onClick(View v){
+                                                    HttpUtils.get("api/items/completecooking/1?item=" + item.getId(), null, new JsonHttpResponseHandler() {
+                                                        public void onSuccess(int statusCode, Header[] headers, final JSONArray innerJsonObject) {
+                                                            Toast.makeText(getActivity(), "Congratulations, your inventory has been updated accordingly!", Toast.LENGTH_LONG).show();
+                                                        }
+                                                        public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                                                            Toast.makeText(getActivity(), "Sorry, we could not adjust your inventory!", Toast.LENGTH_LONG).show();
+                                                        }
+                                                });
+
+                                            }});
+                                            b_delete.setText("I cooked this!");
+                                            ll_itemsLayout.addView(b_delete);
+
+                                            tv.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    if (tv.getText().toString().endsWith("+")) {
+                                                        tv.setText(item.getName() + "-");
+                                                        innerTextView.setVisibility(View.VISIBLE);
+                                                    } else {
+                                                        tv.setText(item.getName() + "+");
+                                                        innerTextView.setVisibility(View.GONE);
+                                                    }
+                                                }
+                                            });
+                                        } catch (Exception ex) {
+
+                                        }
 
                                     }
-                                    innerTextView.setVisibility(View.GONE);
-                                    ll_itemsLayout.addView(innerTextView);
-                                    tv.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            if(tv.getText().toString().endsWith("+")){
-                                                tv.setText(item.getName() + "-");
-                                                innerTextView.setVisibility(View.VISIBLE);
-                                            }
-                                            else{
-                                                tv.setText(item.getName() + "+");
-                                                innerTextView.setVisibility(View.GONE);
-                                            }
-                                        }
-                                    });
                                 }
-                                catch (Exception ex){
-
-                                }
-
-                            }
-                        }
                         );
-
-                    }
 
                 }
                 catch (Exception ex){

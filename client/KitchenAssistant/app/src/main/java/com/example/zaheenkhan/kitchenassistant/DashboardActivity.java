@@ -519,7 +519,10 @@ public class DashboardActivity extends AppCompatActivity {
                             }
                             Toast.makeText(getApplicationContext(), "Please check your new inventory and click on Submit!", Toast.LENGTH_LONG).show();
                             billData = dataToBePassed;
-                            TabLayout.Tab tab = tabLayout.getTabAt(1);
+                            //Force a change for refresh
+                            TabLayout.Tab tab = tabLayout.getTabAt(0);
+                            tab.select();
+                            tab = tabLayout.getTabAt(1);
                             tab.select();
                         } catch (Exception ex) {
                             String x = ex.toString();
