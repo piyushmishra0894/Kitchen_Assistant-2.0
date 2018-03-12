@@ -1,14 +1,22 @@
 package com.example.zaheenkhan.kitchenassistant;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,10 +84,20 @@ public class DashboardFragment extends Fragment {
                                             ItemRecipe[] itemRecipes = mapper.readValue(innerJsonObject.toString(), ItemRecipe[].class);
                                             item.setItemRecipe(itemRecipes);
                                             final TextView tv = new TextView(getActivity());
-                                            tv.setText(item.getName() + "-");
+                                            tv.setText(item.getName());
                                             tv.setHeight(100);
                                             tv.setTextSize(20);
-                                            ll_itemsLayout.addView(tv);
+                                            tv.setTypeface(null, Typeface.BOLD);
+                                            tv.setTextColor(Color.BLACK);
+                                            LinearLayout title = new LinearLayout(getActivity());
+                                            title.setOrientation(LinearLayout.HORIZONTAL);
+                                            title.addView(tv);
+                                            final ImageView expand = new ImageView(getActivity());
+                                            expand.setBackgroundResource(R.drawable.expand);
+                                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(100, 100);
+                                            expand.setLayoutParams(layoutParams);
+                                            title.addView(expand);
+                                            ll_itemsLayout.addView(title);
                                             final TextView innerTextView = new TextView(getActivity());
                                             for (ItemRecipe recipe : item.getItemRecipe()) {
 
@@ -90,6 +108,8 @@ public class DashboardFragment extends Fragment {
                                             innerTextView.setVisibility(View.VISIBLE);
                                             ll_itemsLayout.addView(innerTextView);
                                             Button b_delete = new Button(getActivity());
+                                            b_delete.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                                            b_delete.setTextColor(Color.WHITE);
                                             b_delete.setOnClickListener(new View.OnClickListener(){
                                                 @Override
                                                 public void onClick(View v){
@@ -107,16 +127,20 @@ public class DashboardFragment extends Fragment {
                                             }});
                                             b_delete.setText("I cooked this!");
                                             ll_itemsLayout.addView(b_delete);
+                                            Space s = new Space(getActivity());
+                                            LinearLayout.LayoutParams slayoutParams = new LinearLayout.LayoutParams(100, 30);
+                                            s.setLayoutParams(slayoutParams);
+                                            ll_itemsLayout.addView(s);
 
-                                            tv.setOnClickListener(new View.OnClickListener() {
+                                            expand.setOnClickListener(new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View v) {
-                                                    if (tv.getText().toString().endsWith("+")) {
-                                                        tv.setText(item.getName() + "-");
-                                                        innerTextView.setVisibility(View.VISIBLE);
-                                                    } else {
-                                                        tv.setText(item.getName() + "+");
+                                                    if (expand.getRotation() == 0) {
                                                         innerTextView.setVisibility(View.GONE);
+                                                        expand.setRotation(180);
+                                                    } else {
+                                                        expand.setRotation(0);
+                                                        innerTextView.setVisibility(View.VISIBLE);
                                                     }
                                                 }
                                             });

@@ -56,8 +56,9 @@
             android:layout_above="@+id/b_save"
             android:layout_marginStart="43dp"
             android:layout_toEndOf="@+id/b_addItem"
-            android:background="@android:color/darker_gray"
+            android:background="@color/colorPrimary"
             android:baselineAligned="false"
+            android:textColor="@color/cardview_light_background"
             android:text="DELETE ITEMS" />
 
         <Button
@@ -70,7 +71,7 @@
             android:layout_marginTop="7dp"
             android:background="@color/colorPrimary"
             android:text="SUBMIT"
-            android:textColor="@color/cardview_dark_background" />
+            android:textColor="@color/cardview_light_background" />
 
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>
