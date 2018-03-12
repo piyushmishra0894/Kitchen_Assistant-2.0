@@ -11,8 +11,8 @@ import cz.msebera.android.httpclient.entity.StringEntity;
  */
 
 public class HttpUtils {
-    //private static final String BASE_URL = "http://kitchenassistant.us-east-2.elasticbeanstalk.com";
-    private static final String BASE_URL = "http://192.168.0.13:8000";
+    private static final String BASE_URL = "http://kitchenassistant.us-east-2.elasticbeanstalk.com";
+    //private static final String BASE_URL = "http://192.168.0.13:8000";
 
     private static AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
 
