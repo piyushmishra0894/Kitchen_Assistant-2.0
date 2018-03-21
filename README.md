@@ -2,33 +2,42 @@
 
 # Kitchen_Assistant
 
-
-
 * To start server:
-  1. install nodemon npm package -  'npm i -D nodemon'
+  1. install nodemon npm package -   $ npm i -D nodemon 
   2. edit script section in package.json 
   "scripts": {
   "start:dev": "nodemon ./bin/www",
   "test": "echo \"Error: no test specified\" && exit 1"
 },
-3. run application using following command  - npm run start:dev
+3. run application using following command  -  $ npm run start:dev 
 
+For developement :
+* this application is built using node.js express framework. First step is to install npm, which is node.js package manager. You can refer www.nodejs.org/en/ and www.npmjs.com for detailed steps depending on your system. 
 
 * We are using Sequelize ORM. Following are the steps to install and use sequelize to create models and migration files:
-  1. install sequelize cli and sequelize for mysql
-      npm install -g sequelize-cli
-      npm install --save sequelize
-      npm install --save mysql2
+  1. install sequelize cli and sequelize for mysql:
+  
+    $ npm install -g sequelize-cli 
+    $ npm install --save sequelize 
+    $ npm install --save mysql2 
+    
   2. add paths to different folders(ex migration files, models)in  .sequelizerc file in project's root folder 
-  3. run command 'sequelize init' to generate directories and boilerplate code as specified in .sequelizerc.
+  3. run following command to generate directories and boilerplate code as specified in .sequelizerc.
+    $ sequelize init
  
 * add database details in server/config.json file.
 
-For developement :
 * to create a new migration run following command:
-  sequelize migration:generate --name [name_of_your_migration]
+  $ sequelize migration:generate --name [name_of_your_migration]
+* to run migration :
+  $ sequelize db:migrate
+ 
+* to undo migration : 
+  $ sequelize db:migrate:undo
+  
 * to create new model, run following command:
-  sequelize model:generate --name [model name] --attributes [attribute1]:[attribute1 type], [attribute2]:[attribute2 type]
+  $ sequelize model:generate --name [model name] --attributes [attribute1]:[attribute1 type], [attribute2]:[attribute2 type]
+  
 * add routes in file server/routes/index.js
 
 
