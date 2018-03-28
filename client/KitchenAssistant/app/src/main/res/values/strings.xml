@@ -17,4 +17,5 @@
     <string name="inventory_text_2">This is the list of what you have in store</string>
     <string name="app_url">http://kitchenassistant.us-east-2.elasticbeanstalk.com/</string>
     <string name="title_activity_google_vision_api">GoogleVisionAPI</string>
+    <string name="title_activity_filter">FilterActivity</string>
 </resources>

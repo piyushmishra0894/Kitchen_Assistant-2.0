@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import android.content.Context;
+import android.widget.Filter;
 import android.widget.TextView;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -246,10 +247,9 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
+        if (id == R.id.nav_filter) {
+            Intent i = new Intent(MainActivity.this, FilterActivity.class);
+            startActivity(i);
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {

@@ -48,11 +48,10 @@
             android:name=".DashboardActivity"
             android:label="@string/title_activity_dashboard"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
-        android:name=".GoogleVisionAPI"
-        android:label="@string/title_activity_google_vision_api"
-        android:theme="@style/AppTheme.NoActionBar" />
+            android:name=".GoogleVisionAPI"
+            android:label="@string/title_activity_google_vision_api"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -64,6 +63,10 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
+        <activity
+            android:name=".FilterActivity"
+            android:label="@string/title_activity_filter"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
